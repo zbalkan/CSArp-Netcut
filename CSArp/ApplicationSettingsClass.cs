@@ -172,13 +172,15 @@ namespace CSArp
                 if (fields.Length > 1)
                 {
                     var secondfield = fields[1];
-                    if (secondfield != "")
+                    if (!string.IsNullOrEmpty(secondfield))
                     {
                         var macandclientnamearray = secondfield.Split('\n');
                         foreach (var entry in macandclientnamearray)
                         {
                             if (entry.Length > 10) //exclude any '\n'
+                            {
                                 retval.Add(entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[0], entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                            }
                         }
                     }
                 }
