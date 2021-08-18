@@ -12,7 +12,7 @@ namespace CSArp
             _controller = new Controller(this);
         }
 
-        
+
 
         #region IView members
         public ListView ListView1

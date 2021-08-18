@@ -16,7 +16,7 @@ namespace CSArp
                     view.LogRichTextBox.SelectionStart = view.LogRichTextBox.Text.Length;
                     view.LogRichTextBox.ScrollToCaret();
                 }));
-                
+
                 Debug.Print(output);
             }
             catch (InvalidOperationException) { }

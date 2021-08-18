@@ -134,11 +134,11 @@ namespace CSArp
                     }
                     retval = true; //success
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.Print("Inner Exception at ApplicationSettingsClass.SaveSettings()\n" + ex.Message);
                 }
-                
+
             }
             catch (Exception ex)
             {

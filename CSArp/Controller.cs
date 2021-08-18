@@ -185,7 +185,7 @@ namespace CSArp
         }
         public void AttachOnExitEventHandler()
         {
-            Application.ApplicationExit += (object sender, EventArgs e)=> GetClientList.CloseAllCaptures();
+            Application.ApplicationExit += (object sender, EventArgs e) => GetClientList.CloseAllCaptures();
         }
         public void ShowLogToolStripMenuItemChecked()
         {
@@ -207,14 +207,14 @@ namespace CSArp
             _view.SaveFileDialogLog.FileName = "CSArp-log";
             _view.SaveFileDialogLog.FileOk += (object sender, System.ComponentModel.CancelEventArgs e) =>
             {
-                if(_view.SaveFileDialogLog.FileName!="" && !File.Exists(_view.SaveFileDialogLog.FileName))
+                if (_view.SaveFileDialogLog.FileName != "" && !File.Exists(_view.SaveFileDialogLog.FileName))
                 {
                     try
                     {
                         File.WriteAllText(_view.SaveFileDialogLog.FileName, _view.LogRichTextBox.Text);
                         DebugOutputClass.Print(_view, "Log saved to " + _view.SaveFileDialogLog.FileName);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
