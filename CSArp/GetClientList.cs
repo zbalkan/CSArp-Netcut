@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
 using System.Net;
 using System.Net.NetworkInformation;
 using SharpPcap;
@@ -12,7 +8,6 @@ using PacketDotNet;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using System.IO;
 
 /*
  Reference:

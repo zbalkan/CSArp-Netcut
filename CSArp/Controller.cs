@@ -11,14 +11,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SharpPcap;
 using SharpPcap.WinPcap;
 using SharpPcap.AirPcap;
-using SharpPcap.LibPcap;
-using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
