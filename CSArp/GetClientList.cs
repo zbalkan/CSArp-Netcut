@@ -33,8 +33,8 @@ namespace CSArp
         {
             DebugOutputClass.Print(view, "Refresh client list");
             #region initialization
-            view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Please wait..."));
-            view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
+            _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Please wait..."));
+            _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
             view.ListView1.Items.Clear();
             #endregion
 
@@ -77,10 +77,10 @@ namespace CSArp
                         {
                             DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
                             clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                            view.ListView1.Invoke(new Action(() =>
-                            {
-                                view.ListView1.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
-                            }));
+                            _ = view.ListView1.Invoke(new Action(() =>
+                              {
+                                  _ = view.ListView1.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                              }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
                         //int percentageprogress = (int)((float)stopwatch.ElapsedMilliseconds / scanduration * 100);
@@ -89,15 +89,15 @@ namespace CSArp
                         //Debug.Print(packet.ToString() + "\n");
                     }
                     stopwatch.Stop();
-                    view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count.ToString() + " device(s) found"));
-                    view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
+                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count.ToString() + " device(s) found"));
+                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
                     BackgroundScanStart(view, interfacefriendlyname); //start passive monitoring
                 }
                 catch (PcapException ex)
                 {
                     DebugOutputClass.Print(view, "PcapException @ GetClientList.GetAllClients() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
-                    view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Refresh for scan"));
-                    view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
+                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Refresh for scan"));
+                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
                 }
                 catch (Exception ex)
                 {
@@ -152,8 +152,8 @@ namespace CSArp
                     {
                         DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
                         clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                        view.ListView1.Invoke(new Action(() => view.ListView1.Items.Add(new ListViewItem(new string[] { (clientlist.Count).ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }))));
-                        view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
+                        _ = view.ListView1.Invoke(new Action(() => view.ListView1.Items.Add(new ListViewItem(new string[] { (clientlist.Count).ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }))));
+                        _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
                     }
                 };
                 capturedevice.StartCapture();

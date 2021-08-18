@@ -84,7 +84,7 @@ namespace CSArp
             }
             else
             {
-                MessageBox.Show("Please select a network interface!", "Interface", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                _ = MessageBox.Show("Please select a network interface!", "Interface", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
         }
 
@@ -100,11 +100,11 @@ namespace CSArp
                 foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
                 {
                     targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
-                    _view.MainForm.BeginInvoke(new Action(() =>
-                    {
-                        _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
-                        _view.ToolStripStatus.Text = "Arpspoofing active...";
-                    }));
+                    _ = _view.MainForm.BeginInvoke(new Action(() =>
+                      {
+                          _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
+                          _view.ToolStripStatus.Text = "Arpspoofing active...";
+                      }));
                 }
                 DisconnectReconnect.Disconnect(_view, targetlist, GetGatewayIP(_view.ToolStripComboBoxDeviceList.Text), GetGatewayMAC(_view.ToolStripComboBoxDeviceList.Text), _view.ToolStripComboBoxDeviceList.Text);
 
@@ -137,7 +137,7 @@ namespace CSArp
         #region Trivial GUI elements control methods
         public void ShowAboutBox()
         {
-            MessageBox.Show("Author : globalpolicy\nContact : yciloplabolg@gmail.com\nBlog : c0dew0rth.blogspot.com\nGithub : globalpolicy\nContributions are welcome!", "About CSArp", MessageBoxButtons.OK);
+            _ = MessageBox.Show("Author : globalpolicy\nContact : yciloplabolg@gmail.com\nBlog : c0dew0rth.blogspot.com\nGithub : globalpolicy\nContributions are welcome!", "About CSArp", MessageBoxButtons.OK);
         }
         public void EndApplication()
         {
@@ -216,11 +216,11 @@ namespace CSArp
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        _ = MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             };
-            _view.SaveFileDialogLog.ShowDialog();
+            _ = _view.SaveFileDialogLog.ShowDialog();
         }
 
 
