@@ -103,9 +103,9 @@ namespace CSArp
                             }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
-                        int percentageprogress = (int)((float)stopwatch.ElapsedMilliseconds / scanduration * 100);
-                        view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Scanning " + percentageprogress + "%"));
-                        view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = percentageprogress));
+                        //int percentageprogress = (int)((float)stopwatch.ElapsedMilliseconds / scanduration * 100);
+                        //view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Scanning " + percentageprogress + "%"));
+                        //view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = percentageprogress));
                         //Debug.Print(packet.ToString() + "\n");
                     }
                     stopwatch.Stop();
