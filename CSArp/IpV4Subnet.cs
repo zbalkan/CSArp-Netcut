@@ -104,7 +104,10 @@ namespace CSArp
             uint subnetConsecutiveOnes = 0;
             for (var i = 0; i < 32; i++)
             {
-                if (!(mask & subnet).Equals(mask)) break;
+                if (!(mask & subnet).Equals(mask))
+                {
+                    break;
+                }
 
                 subnetConsecutiveOnes++;
                 mask >>= 1;

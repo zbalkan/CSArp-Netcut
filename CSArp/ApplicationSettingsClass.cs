@@ -95,7 +95,9 @@ namespace CSArp
                     if (clientname != "")
                     {
                         if (!listviewdictionary.Contains(new KeyValuePair<string, string>(macaddress, clientname))) //just in case listview has multiple entries though that shouldn't happen
+                        {
                             listviewdictionary.Add(macaddress, clientname);
+                        }
                     }
                 }
                 #endregion
@@ -176,7 +178,9 @@ namespace CSArp
                     foreach (var entry in macandclientnamearray)
                     {
                         if (entry.Length > 10) //exclude any '\n'
+                        {
                             retval.Add(entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[0], entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                        }
                     }
                 }
             }

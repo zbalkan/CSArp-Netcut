@@ -183,7 +183,9 @@ namespace CSArp
         public void ToolStripSaveClicked()
         {
             if (ApplicationSettingsClass.SaveSettings(_view.ListView1, _view.ToolStripComboBoxDeviceList.Text))
+            {
                 _view.ToolStripStatus.Text = "Settings saved!";
+            }
         }
         public void AttachOnExitEventHandler()
         {
@@ -270,7 +272,9 @@ namespace CSArp
                         foreach (var gateway in networkinterface.GetIPProperties().GatewayAddresses)
                         {
                             if (gateway.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //filter ipv4 gateway ip address
+                            {
                                 retval = gateway.Address;
+                            }
                         }
                     }
                 }

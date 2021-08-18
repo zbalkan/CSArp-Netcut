@@ -54,7 +54,9 @@ namespace CSArp
         {
             disengageflag = true;
             if (engagedclientlist != null)
+            {
                 engagedclientlist.Clear();
+            }
         }
 
     }

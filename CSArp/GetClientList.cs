@@ -223,7 +223,10 @@ namespace CSArp
             {
                 var retval = "";
                 for (var i = 0; i <= 5; i++)
+                {
                     retval += physicaladdress.GetAddressBytes()[i].ToString("X2") + ":";
+                }
+
                 return retval.Substring(0, retval.Length - 1);
             }
             catch (Exception ex)
