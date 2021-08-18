@@ -40,26 +40,35 @@ namespace CSArp
         #endregion
 
         /// <summary>
-        /// Populate the available network cards
+        /// Populate the available network cards. Excludes bridged network adapters, since they are not applicable to spoofing scenario
+        /// <see cref="https://github.com/chmorgan/sharppcap/issues/57"/>
         /// </summary>
         public void PopulateInterfaces()
         {
             CaptureDeviceList capturedevicelist = CaptureDeviceList.Instance;
-            List<string> capturedevicelistofstring = new List<string>();
+            List<string> captureDeviceNames = new List<string>();
             capturedevicelist.ToList().ForEach((ICaptureDevice capturedevice) =>
             {
                 if (capturedevice is WinPcapDevice)
                 {
                     WinPcapDevice winpcapdevice = (WinPcapDevice)capturedevice;
-                    capturedevicelistofstring.Add(winpcapdevice.Interface.FriendlyName);
+                    if (winpcapdevice.Interface.FriendlyName != null)
+                    {
+                        captureDeviceNames.Add(winpcapdevice.Interface.FriendlyName);
+                    }
                 }
                 else if (capturedevice is AirPcapDevice)
                 {
                     AirPcapDevice airpcapdevice = (AirPcapDevice)capturedevice;
-                    capturedevicelistofstring.Add(airpcapdevice.Interface.FriendlyName);
+                    if (airpcapdevice.Interface.FriendlyName != null)
+                    {
+                        captureDeviceNames.Add(airpcapdevice.Interface.FriendlyName);
+                    }
                 }
             });
-            _view.ToolStripComboBoxDeviceList.Items.AddRange(capturedevicelistofstring.ToArray());
+
+            var nameArray = captureDeviceNames.ToArray();
+            _view.ToolStripComboBoxDeviceList.Items.AddRange(nameArray);
         }
 
         /// <summary>
