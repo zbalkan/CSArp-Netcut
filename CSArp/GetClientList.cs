@@ -25,6 +25,8 @@ namespace CSArp
     public static class GetClientList
     {
         private static ICaptureDevice capturedevice;
+        private static IPAddress currentAddress;
+        private static IPV4Subnet subnet;
         private static Dictionary<IPAddress, PhysicalAddress> clientlist;
 
         /// <summary>
@@ -38,39 +40,21 @@ namespace CSArp
             #region initialization
             view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Please wait..."));
             view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
-            if (capturedevice != null)
-            {
-                try
-                {
-                    capturedevice.StopCapture(); //stop previous capture
-                    capturedevice.Close(); //close previous instances
-                }
-                catch (PcapException ex)
-                {
-                    DebugOutputClass.Print(view, "Exception at GetAllClients while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message+"]");
-                }
-            }
-            clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
             view.ListView1.Items.Clear();
             #endregion
-
-            CaptureDeviceList capturedevicelist = CaptureDeviceList.Instance;
-            capturedevicelist.Refresh(); //crucial for reflection of any network changes
-            capturedevice = (from devicex in capturedevicelist where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
-            capturedevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
-            IPAddress myipaddress = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses[1].Addr.ipAddress; //possible critical point : Addresses[1] in hardcoding the index for obtaining ipv4 address
 
             #region Sending ARP requests to probe for all possible IP addresses on LAN
             new Thread(() =>
              {
                  try
                  {
-                     for (int ipindex = 1; ipindex <= 255; ipindex++)
+                     foreach (var ipAddress in subnet.ToList())
                      {
-                         ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), IPAddress.Parse(GetRootIp(myipaddress) + ipindex), capturedevice.MacAddress, myipaddress);
+                         ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
                          EthernetPacket ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
                          ethernetpacket.PayloadPacket = arprequestpacket;
                          capturedevice.SendPacket(ethernetpacket);
+                         Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
                      }
                  }
                  catch (Exception ex)
@@ -94,8 +78,9 @@ namespace CSArp
                     {
                         Packet packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
                         ARPPacket arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-                        if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && areCompatibleIPs(arppacket.SenderProtocolAddress, myipaddress))
+                        if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
+                            DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
                             clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             view.ListView1.Invoke(new Action(() =>
                             {
@@ -115,7 +100,7 @@ namespace CSArp
                 }
                 catch (PcapException ex)
                 {
-                    DebugOutputClass.Print(view, "PcapException @ GetClientList.GetAllClients() @ new Thread(()=>{}) while retrieving packets [" + ex.Message+"]");
+                    DebugOutputClass.Print(view, "PcapException @ GetClientList.GetAllClients() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
                     view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Refresh for scan"));
                     view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
                 }
@@ -135,7 +120,6 @@ namespace CSArp
         {
             try
             {
-                IPAddress myipaddress = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses[1].Addr.ipAddress; //possible critical point : Addresses[1] in hardcoding the index for obtaining ipv4 address
                 #region Sending ARP requests to probe for all possible IP addresses on LAN
                 new Thread(() =>
                 {
@@ -143,12 +127,13 @@ namespace CSArp
                     {
                         while (capturedevice != null)
                         {
-                            for (int ipindex = 1; ipindex <= 255; ipindex++)
+                            foreach (var ipAddress in subnet.ToList())
                             {
-                                ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), IPAddress.Parse(GetRootIp(myipaddress) + ipindex), capturedevice.MacAddress, myipaddress);
+                                ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
                                 EthernetPacket ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
                                 ethernetpacket.PayloadPacket = arprequestpacket;
                                 capturedevice.SendPacket(ethernetpacket);
+                                Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
                             }
                         }
                     }
@@ -168,7 +153,7 @@ namespace CSArp
                 {
                     Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
                     ARPPacket arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-                    if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && areCompatibleIPs(arppacket.SenderProtocolAddress, myipaddress))
+                    if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                     {
                         DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
                         clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
@@ -200,6 +185,33 @@ namespace CSArp
             catch { }
         }
 
+        public static void PopulateCaptureDeviceInfo(IView view, string interfacefriendlyname)
+        {
+            if (capturedevice != null)
+            {
+                try
+                {
+                    capturedevice.StopCapture(); //stop previous capture
+                    capturedevice.Close(); //close previous instances
+                }
+                catch (PcapException ex)
+                {
+                    DebugOutputClass.Print(view, "Exception at GetAllClients while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
+                }
+            }
+            clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
+            CaptureDeviceList capturedevicelist = CaptureDeviceList.Instance;
+            capturedevicelist.Refresh(); //crucial for reflection of any network changes
+            capturedevice = (from devicex in capturedevicelist where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
+            capturedevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
+            var addresses = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses[1];
+            currentAddress = addresses.Addr.ipAddress; //possible critical point : Addresses[1] in hardcoding the index for obtaining ipv4 address
+            if (subnet == null)
+            {
+                subnet = new IPV4Subnet(currentAddress, new IPAddress(addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray())); // Sharppcap returns reversed mask
+            }
+        }
+
         /// <summary>
         /// Converts a PhysicalAddress to colon delimited string like FF:FF:FF:FF:FF:FF
         /// </summary>
@@ -219,28 +231,6 @@ namespace CSArp
                 throw ex;
             }
 
-        }
-
-        /// <summary>
-        /// Converts say 192.168.1.4 to 192.168.1.
-        /// </summary>
-        /// <param name="ipaddress"></param>
-        /// <returns></returns>
-        private static string GetRootIp(IPAddress ipaddress)
-        {
-            string ipaddressstring = ipaddress.ToString();
-            return ipaddressstring.Substring(0, ipaddressstring.LastIndexOf(".") + 1);
-        }
-
-        /// <summary>
-        /// Checks if both IPAddresses have the same root ip
-        /// </summary>
-        /// <param name="ip1"></param>
-        /// <param name="ip2"></param>
-        /// <returns></returns>
-        private static bool areCompatibleIPs(IPAddress ip1, IPAddress ip2)
-        {
-            return (GetRootIp(ip1) == GetRootIp(ip2)) ? true : false;
         }
     }
 }
