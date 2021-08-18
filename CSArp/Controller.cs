@@ -29,7 +29,7 @@ namespace CSArp
     public class Controller
     {
         #region fields
-        private IView _view;
+        private readonly IView _view;
         #endregion
 
         #region constructor

@@ -22,8 +22,8 @@ namespace CSArp
             Note that the same MAC cannot have two clientnames but the same clientname can have two MACs
              */
 
-        private static string majorDelim = "--------------------------------------------------------------" + "\n";
-        private static string minorDelim = "$";
+        private static readonly string majorDelim = "--------------------------------------------------------------" + "\n";
+        private static readonly string minorDelim = "$";
 
         /// <summary>
         /// Retrieves saved client name from a PhysicalAddress if present in CSArp_settings.ini file

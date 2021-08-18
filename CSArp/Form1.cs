@@ -12,7 +12,7 @@ namespace CSArp
 {
     public partial class Form1 : Form, IView
     {
-        private Controller _controller;
+        private readonly Controller _controller;
         public Form1()
         {
             InitializeComponent();
