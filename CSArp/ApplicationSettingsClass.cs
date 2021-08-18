@@ -168,15 +168,17 @@ namespace CSArp
             var retval = new Dictionary<string, string>();
             try
             {
-                var secondfield = settingsfilecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[1];
-                if (secondfield != "")
+                var fields = settingsfilecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries);
+                if (fields.Length > 1)
                 {
-                    var macandclientnamearray = secondfield.Split('\n');
-                    foreach (var entry in macandclientnamearray)
+                    var secondfield = fields[1];
+                    if (secondfield != "")
                     {
-                        if (entry.Length > 10) //exclude any '\n'
+                        var macandclientnamearray = secondfield.Split('\n');
+                        foreach (var entry in macandclientnamearray)
                         {
-                            retval.Add(entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[0], entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                            if (entry.Length > 10) //exclude any '\n'
+                                retval.Add(entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[0], entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[1]);
                         }
                     }
                 }
