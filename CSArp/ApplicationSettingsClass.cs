@@ -32,13 +32,13 @@ namespace CSArp
         /// <returns></returns>
         public static string GetSavedClientNameFromMAC(string clientMACaddress)
         {
-            string retval = "";
+            var retval = "";
             try
             {
                 if (File.Exists("CSArp_settings.ini"))
                 {
-                    string filecontents = File.ReadAllText("CSArp_settings.ini");
-                    Dictionary<string, string> mactoclientnamedictionary = GetMACtoClientNameDictionary(filecontents);
+                    var filecontents = File.ReadAllText("CSArp_settings.ini");
+                    var mactoclientnamedictionary = GetMACtoClientNameDictionary(filecontents);
                     if (mactoclientnamedictionary.ContainsKey(clientMACaddress))
                     {
                         retval = (from entry in mactoclientnamedictionary where entry.Key == clientMACaddress select entry.Value).ToList()[0];
@@ -60,12 +60,12 @@ namespace CSArp
         /// <returns></returns>
         public static string GetSavedPreferredInterfaceFriendlyName()
         {
-            string retval = "";
+            var retval = "";
             try
             {
                 if (File.Exists("CSArp_settings.ini"))
                 {
-                    string filecontents = File.ReadAllText("CSArp_settings.ini");
+                    var filecontents = File.ReadAllText("CSArp_settings.ini");
                     retval = filecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[0].Split('\n')[0];
                 }
             }
@@ -83,15 +83,15 @@ namespace CSArp
         /// <param name="interfacefriendlyname"></param>
         public static bool SaveSettings(ListView listview, string interfacefriendlyname)
         {
-            bool retval = false;
+            var retval = false;
             try
             {
                 #region Populate listviewdictionary with entries from listview
-                Dictionary<string, string> listviewdictionary = new Dictionary<string, string>();
+                var listviewdictionary = new Dictionary<string, string>();
                 foreach (ListViewItem listviewitem in listview.Items)
                 {
-                    string macaddress = listviewitem.SubItems[2].Text;
-                    string clientname = listviewitem.SubItems[4].Text;
+                    var macaddress = listviewitem.SubItems[2].Text;
+                    var clientname = listviewitem.SubItems[4].Text;
                     if (clientname != "")
                     {
                         if (!listviewdictionary.Contains(new KeyValuePair<string, string>(macaddress, clientname))) //just in case listview has multiple entries though that shouldn't happen
@@ -104,13 +104,13 @@ namespace CSArp
                 {
                     if (File.Exists("CSArp_settings.ini"))
                     {
-                        string filecontentstring = File.ReadAllText("CSArp_settings.ini");
-                        Dictionary<string, string> olddictionary = GetMACtoClientNameDictionary(filecontentstring);
+                        var filecontentstring = File.ReadAllText("CSArp_settings.ini");
+                        var olddictionary = GetMACtoClientNameDictionary(filecontentstring);
                         #region Update olddictionary with entries from listviewdictionary
                         foreach (var entry in listviewdictionary)
                         {
-                            string macaddress = entry.Key;
-                            string clientname = entry.Value;
+                            var macaddress = entry.Key;
+                            var clientname = entry.Value;
 
                             if (!olddictionary.Contains(new KeyValuePair<string, string>(macaddress, clientname))) //if doesn't already exist
                             {
@@ -151,7 +151,7 @@ namespace CSArp
         #region Private methods
         private static void WriteToFile(string interfacefriendlyname, Dictionary<string, string> macaddressclientnamedictionary, string filename)
         {
-            string towrite = interfacefriendlyname + "\n" + majorDelim;
+            var towrite = interfacefriendlyname + "\n" + majorDelim;
             foreach (var entry in macaddressclientnamedictionary)
             {
                 towrite += entry.Key + minorDelim + entry.Value + "\n";
@@ -166,14 +166,14 @@ namespace CSArp
         /// <returns></returns>
         private static Dictionary<string, string> GetMACtoClientNameDictionary(string settingsfilecontents)
         {
-            Dictionary<string, string> retval = new Dictionary<string, string>();
+            var retval = new Dictionary<string, string>();
             try
             {
-                string secondfield = settingsfilecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[1];
+                var secondfield = settingsfilecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[1];
                 if (secondfield != "")
                 {
-                    string[] macandclientnamearray = secondfield.Split('\n');
-                    foreach (string entry in macandclientnamearray)
+                    var macandclientnamearray = secondfield.Split('\n');
+                    foreach (var entry in macandclientnamearray)
                     {
                         if (entry.Length > 10) //exclude any '\n'
                             retval.Add(entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[0], entry.Split(new string[] { minorDelim }, StringSplitOptions.RemoveEmptyEntries)[1]);

@@ -13,7 +13,7 @@ namespace CSArp
         {
             try
             {
-                string datetimenow = DateTime.Now.ToString();
+                var datetimenow = DateTime.Now.ToString();
                 view.LogRichTextBox.Invoke(new Action(() =>
                 {
                     view.LogRichTextBox.Text += datetimenow + " : " + output + "\n";

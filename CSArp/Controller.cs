@@ -45,13 +45,13 @@ namespace CSArp
         /// </summary>
         public void PopulateInterfaces()
         {
-            CaptureDeviceList capturedevicelist = CaptureDeviceList.Instance;
-            List<string> captureDeviceNames = new List<string>();
+            var capturedevicelist = CaptureDeviceList.Instance;
+            var captureDeviceNames = new List<string>();
             capturedevicelist.ToList().ForEach((ICaptureDevice capturedevice) =>
             {
                 if (capturedevice is WinPcapDevice)
                 {
-                    WinPcapDevice winpcapdevice = (WinPcapDevice)capturedevice;
+                    var winpcapdevice = (WinPcapDevice)capturedevice;
                     if (winpcapdevice.Interface.FriendlyName != null)
                     {
                         captureDeviceNames.Add(winpcapdevice.Interface.FriendlyName);
@@ -59,7 +59,7 @@ namespace CSArp
                 }
                 else if (capturedevice is AirPcapDevice)
                 {
-                    AirPcapDevice airpcapdevice = (AirPcapDevice)capturedevice;
+                    var airpcapdevice = (AirPcapDevice)capturedevice;
                     if (airpcapdevice.Interface.FriendlyName != null)
                     {
                         captureDeviceNames.Add(airpcapdevice.Interface.FriendlyName);
@@ -99,8 +99,8 @@ namespace CSArp
         {
             if (_view.ListView1.SelectedItems.Count > 0)
             {
-                Dictionary<IPAddress, PhysicalAddress> targetlist = new Dictionary<IPAddress, PhysicalAddress>();
-                int parseindex = 0;
+                var targetlist = new Dictionary<IPAddress, PhysicalAddress>();
+                var parseindex = 0;
                 foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
                 {
                     targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
@@ -241,12 +241,12 @@ namespace CSArp
         private IPAddress GetGatewayIP(string friendlyname)
         {
             IPAddress retval = null;
-            string interfacename = "";
-            foreach (ICaptureDevice capturedevice in CaptureDeviceList.Instance)
+            var interfacename = "";
+            foreach (var capturedevice in CaptureDeviceList.Instance)
             {
                 if (capturedevice is WinPcapDevice)
                 {
-                    WinPcapDevice winpcapdevice = (WinPcapDevice)capturedevice;
+                    var winpcapdevice = (WinPcapDevice)capturedevice;
                     if (winpcapdevice.Interface.FriendlyName == friendlyname)
                     {
                         interfacename = winpcapdevice.Interface.Name;
@@ -254,7 +254,7 @@ namespace CSArp
                 }
                 else if (capturedevice is AirPcapDevice)
                 {
-                    AirPcapDevice airpcapdevice = (AirPcapDevice)capturedevice;
+                    var airpcapdevice = (AirPcapDevice)capturedevice;
                     if (airpcapdevice.Interface.FriendlyName == friendlyname)
                     {
                         interfacename = airpcapdevice.Interface.Name;
@@ -280,7 +280,7 @@ namespace CSArp
         private PhysicalAddress GetGatewayMAC(string friendlyname)
         {
             PhysicalAddress retval = null;
-            string gatewayip = GetGatewayIP(friendlyname).ToString();
+            var gatewayip = GetGatewayIP(friendlyname).ToString();
             foreach (ListViewItem listviewitem in _view.ListView1.Items)
             {
                 if (listviewitem.SubItems[1].Text == gatewayip)

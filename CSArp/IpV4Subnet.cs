@@ -17,16 +17,16 @@ namespace CSArp
         public IPV4Subnet(IPAddress currentAddress, IPAddress subnetMask)
         {
             // Convert the IP address to bytes.
-            byte[] ipBytes = currentAddress.GetAddressBytes();
+            var ipBytes = currentAddress.GetAddressBytes();
 
             // Get bytes from subnet mask
             var maskBytes = subnetMask.GetAddressBytes();
 
-            byte[] firstIpAddressAsByte = new byte[ipBytes.Length];
-            byte[] lastIpAddressAsByte = new byte[ipBytes.Length];
+            var firstIpAddressAsByte = new byte[ipBytes.Length];
+            var lastIpAddressAsByte = new byte[ipBytes.Length];
 
             // Calculate the bytes of the start and end IP addresses.
-            for (int i = 0; i < ipBytes.Length; i++)
+            for (var i = 0; i < ipBytes.Length; i++)
             {
                 firstIpAddressAsByte[i] = (byte)(ipBytes[i] & maskBytes[i]);
                 lastIpAddressAsByte[i] = (byte)(ipBytes[i] | ~maskBytes[i]);
@@ -76,7 +76,7 @@ namespace CSArp
         }
         private IEnumerator<IPAddress> GetEnumerator()
         {
-            for (uint adr = firstAddressAsUint; adr <= lastAddressAsUint; adr++)
+            for (var adr = firstAddressAsUint; adr <= lastAddressAsUint; adr++)
             {
                 yield return ConvertToIPv4Address(adr);
             }
@@ -98,11 +98,11 @@ namespace CSArp
 
         private static int SubnetToCIDR(IPAddress subnetMask)
         {
-            byte[] ipParts = subnetMask.GetAddressBytes();
-            uint subnet = 16777216 * Convert.ToUInt32(ipParts[0]) + 65536 * Convert.ToUInt32(ipParts[1]) + 256 * Convert.ToUInt32(ipParts[2]) + Convert.ToUInt32(ipParts[3]);
-            uint mask = 0x80000000;
+            var ipParts = subnetMask.GetAddressBytes();
+            var subnet = 16777216 * Convert.ToUInt32(ipParts[0]) + 65536 * Convert.ToUInt32(ipParts[1]) + 256 * Convert.ToUInt32(ipParts[2]) + Convert.ToUInt32(ipParts[3]);
+            var mask = 0x80000000;
             uint subnetConsecutiveOnes = 0;
-            for (int i = 0; i < 32; i++)
+            for (var i = 0; i < 32; i++)
             {
                 if (!(mask & subnet).Equals(mask)) break;
 

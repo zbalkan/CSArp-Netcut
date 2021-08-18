@@ -50,8 +50,8 @@ namespace CSArp
                  {
                      foreach (var ipAddress in subnet.ToList())
                      {
-                         ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
-                         EthernetPacket ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
+                         var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
+                         var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
                          ethernetpacket.PayloadPacket = arprequestpacket;
                          capturedevice.SendPacket(ethernetpacket);
                          Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
@@ -72,12 +72,12 @@ namespace CSArp
             {
                 try
                 {
-                    Stopwatch stopwatch = new Stopwatch();
+                    var stopwatch = new Stopwatch();
                     stopwatch.Start();
                     while ((rawcapture = capturedevice.GetNextPacket()) != null && stopwatch.ElapsedMilliseconds <= scanduration)
                     {
-                        Packet packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
-                        ARPPacket arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
+                        var packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
+                        var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
                         if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
                             DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
@@ -129,8 +129,8 @@ namespace CSArp
                         {
                             foreach (var ipAddress in subnet.ToList())
                             {
-                                ARPPacket arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
-                                EthernetPacket ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
+                                var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
+                                var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
                                 ethernetpacket.PayloadPacket = arprequestpacket;
                                 capturedevice.SendPacket(ethernetpacket);
                                 Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
@@ -151,8 +151,8 @@ namespace CSArp
                 #region Assign OnPacketArrival event handler and start capturing
                 capturedevice.OnPacketArrival += (object sender, CaptureEventArgs e) =>
                 {
-                    Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
-                    ARPPacket arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
+                    var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
+                    var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
                     if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                     {
                         DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
@@ -200,7 +200,7 @@ namespace CSArp
                 }
             }
             clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
-            CaptureDeviceList capturedevicelist = CaptureDeviceList.Instance;
+            var capturedevicelist = CaptureDeviceList.Instance;
             capturedevicelist.Refresh(); //crucial for reflection of any network changes
             capturedevice = (from devicex in capturedevicelist where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
             capturedevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
@@ -221,8 +221,8 @@ namespace CSArp
         {
             try
             {
-                string retval = "";
-                for (int i = 0; i <= 5; i++)
+                var retval = "";
+                for (var i = 0; i <= 5; i++)
                     retval += physicaladdress.GetAddressBytes()[i].ToString("X2") + ":";
                 return retval.Substring(0, retval.Length - 1);
             }
