@@ -45,17 +45,15 @@ namespace CSArp
             var captureDeviceNames = new List<string>();
             capturedevicelist.ToList().ForEach((ICaptureDevice capturedevice) =>
             {
-                if (capturedevice is WinPcapDevice)
+                if (capturedevice is WinPcapDevice winpcapdevice)
                 {
-                    var winpcapdevice = (WinPcapDevice)capturedevice;
                     if (winpcapdevice.Interface.FriendlyName != null)
                     {
                         captureDeviceNames.Add(winpcapdevice.Interface.FriendlyName);
                     }
                 }
-                else if (capturedevice is AirPcapDevice)
+                else if (capturedevice is AirPcapDevice airpcapdevice)
                 {
-                    var airpcapdevice = (AirPcapDevice)capturedevice;
                     if (airpcapdevice.Interface.FriendlyName != null)
                     {
                         captureDeviceNames.Add(airpcapdevice.Interface.FriendlyName);
@@ -242,17 +240,15 @@ namespace CSArp
             var interfacename = "";
             foreach (var capturedevice in CaptureDeviceList.Instance)
             {
-                if (capturedevice is WinPcapDevice)
+                if (capturedevice is WinPcapDevice winpcapdevice)
                 {
-                    var winpcapdevice = (WinPcapDevice)capturedevice;
                     if (winpcapdevice.Interface.FriendlyName == friendlyname)
                     {
                         interfacename = winpcapdevice.Interface.Name;
                     }
                 }
-                else if (capturedevice is AirPcapDevice)
+                else if (capturedevice is AirPcapDevice airpcapdevice)
                 {
-                    var airpcapdevice = (AirPcapDevice)capturedevice;
                     if (airpcapdevice.Interface.FriendlyName == friendlyname)
                     {
                         interfacename = airpcapdevice.Interface.Name;
