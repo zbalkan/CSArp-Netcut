@@ -94,8 +94,6 @@ namespace CSArp
             #endregion
         }
 
-
-
         /// <summary>
         /// Actively monitor ARP packets for signs of new clients after GetAllClients active scan is done
         /// </summary>
@@ -113,18 +111,7 @@ namespace CSArp
                 #region Assign OnPacketArrival event handler and start capturing
                 capturedevice.OnPacketArrival += (object sender, CaptureEventArgs e) =>
                 {
-                    var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
-                    var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-                    if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
-                    {
-                        DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
-                        clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                        _ = view.ClientListView.Invoke(new Action(() =>
-                        {
-                            _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
-                        }));
-                        _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
-                    }
+                    ParseArpResponse(view, e);
                 };
                 capturedevice.StartCapture();
                 #endregion
@@ -135,8 +122,6 @@ namespace CSArp
                 DebugOutputClass.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
         }
-
-
 
         /// <summary>
         /// Stops any ongoing capture and closes capturedevice if open
@@ -219,6 +204,22 @@ namespace CSArp
             ethernetpacket.PayloadPacket = arprequestpacket;
             capturedevice.SendPacket(ethernetpacket);
             Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
+        }
+
+        private static void ParseArpResponse(IView view, CaptureEventArgs e)
+        {
+            var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
+            var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
+            if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
+            {
+                DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
+                clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
+                _ = view.ClientListView.Invoke(new Action(() =>
+                {
+                    _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                }));
+                _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
+            }
         }
 
         /// <summary>
