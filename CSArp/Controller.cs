@@ -74,13 +74,16 @@ namespace CSArp
         /// </summary>
         public void RefreshClients()
         {
-            if (_view.ToolStripComboBoxDeviceList.Text != "") //if a network interface has been selected
+            if (!string.IsNullOrEmpty(selectedInterfaceFriendlyName)) //if a network interface has been selected
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
-                    DisconnectReconnect.Reconnect(); //first disengage spoofing threads
-                    _view.ToolStripStatus.Text = "Ready";
-                    GetClientList.GetAllClients(_view, _view.ToolStripComboBoxDeviceList.Text);
+                    DisconnectReconnect.Reconnect(); // first disengage spoofing threads
+                    _ = _view.MainForm.BeginInvoke(new Action(() =>
+                    {
+                        _view.ToolStripStatus.Text = "Ready";
+                    }));
+                    GetClientList.GetAllClients(_view, selectedInterfaceFriendlyName, gatewayIpAddress);
                 }
 
             }
@@ -95,6 +98,34 @@ namespace CSArp
         /// </summary>
         public void DisconnectSelectedClients()
         {
+            // Guard clause
+            if (_view.ListView1.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            // Workaround: Check if gateway is listed in the items, to ensure MAC address is in the list
+            var gatewayFound = false;
+
+            foreach (ListViewItem item in _view.ListView1.Items)
+            {
+                if (item.SubItems[1].Text == gatewayIpAddress.ToString())
+                {
+                    gatewayFound = true;
+                    gatewayPhysicalAddress = PhysicalAddress.Parse(item.SubItems[2].Text.Replace(":", "-"));
+                }
+            }
+            if (!gatewayFound)
+            {
+                _ = MessageBox.Show("Gateway Physical Address still undiscovered. Please wait and ry again.","Warning",MessageBoxButtons.OK);
+                return;
+            }
+
+            _ = _view.MainForm.Invoke(new Action(() =>
+            {
+                _view.ToolStripStatus.Text = "Arpspoofing active...";
+            }));
+
             var targetlist = new Dictionary<IPAddress, PhysicalAddress>();
             var parseindex = 0;
             foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
@@ -103,12 +134,7 @@ namespace CSArp
                 _ = _view.MainForm.BeginInvoke(new Action(() =>
                   {
                       _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
-                      _view.ToolStripStatus.Text = "Arpspoofing active...";
                   }));
-            }
-            if(gatewayPhysicalAddress == null)
-            {
-                gatewayPhysicalAddress = GetGatewayMAC();
             }
             DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
         }
@@ -148,7 +174,6 @@ namespace CSArp
 
             gatewayInfo = PopulateGatewayInfo(selectedInterfaceFriendlyName);
             gatewayIpAddress = gatewayInfo.Address;
-            gatewayPhysicalAddress = GetGatewayMAC();
             GetClientList.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
         }
 
@@ -257,22 +282,9 @@ namespace CSArp
             }
 
             var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-            
+
             return interfaces.FirstOrDefault(i => i.Name == friendlyname).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
             == System.Net.Sockets.AddressFamily.InterNetwork);
-        }
-
-        private PhysicalAddress GetGatewayMAC()
-        {
-            PhysicalAddress retval = null;
-            foreach (ListViewItem listviewitem in _view.ListView1.Items)
-            {
-                if (listviewitem.SubItems[1].Text == gatewayIpAddress.ToString())
-                {
-                    retval = PhysicalAddress.Parse(listviewitem.SubItems[2].Text.Replace(":", "-"));
-                }
-            }
-            return retval;
         }
         #endregion
     }
