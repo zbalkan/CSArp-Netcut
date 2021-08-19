@@ -35,7 +35,7 @@ namespace CSArp
             #region initialization
             _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Please wait..."));
             _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
-            view.ListView1.Items.Clear();
+            view.ClientListView.Items.Clear();
             #endregion
 
             #region Sending ARP requests to probe for all possible IP addresses on LAN
@@ -82,9 +82,9 @@ namespace CSArp
                         {
                             DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
                             clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                            _ = view.ListView1.Invoke(new Action(() =>
+                            _ = view.ClientListView.Invoke(new Action(() =>
                               {
-                                  _ = view.ListView1.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                                  _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                               }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
@@ -162,9 +162,9 @@ namespace CSArp
                     {
                         DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
                         clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                        _ = view.ListView1.Invoke(new Action(() =>
+                        _ = view.ClientListView.Invoke(new Action(() =>
                         {
-                            _ = view.ListView1.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                            _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                         }));
                         _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
                     }

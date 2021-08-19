@@ -4,9 +4,9 @@ namespace CSArp
 {
     public interface IView
     {
-        ListView ListView1 { get; }
+        ListView ClientListView { get; }
         ToolStripStatusLabel ToolStripStatus { get; }
-        ToolStripComboBox ToolStripComboBoxDeviceList { get; }
+        ToolStripComboBox ToolStripComboBoxNetworkDeviceList { get; }
         Form MainForm { get; }
         NotifyIcon NotifyIcon1 { get; }
         ToolStripTextBox ToolStripTextBoxClientName { get; }

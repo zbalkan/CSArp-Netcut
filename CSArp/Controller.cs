@@ -66,7 +66,7 @@ namespace CSArp
             });
 
             var nameArray = captureDeviceNames.ToArray();
-            _view.ToolStripComboBoxDeviceList.Items.AddRange(nameArray);
+            _view.ToolStripComboBoxNetworkDeviceList.Items.AddRange(nameArray);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace CSArp
         public void DisconnectSelectedClients()
         {
             // Guard clause
-            if (_view.ListView1.SelectedItems.Count == 0)
+            if (_view.ClientListView.SelectedItems.Count == 0)
             {
                 return;
             }
@@ -107,7 +107,7 @@ namespace CSArp
             // Workaround: Check if gateway is listed in the items, to ensure MAC address is in the list
             var gatewayFound = false;
 
-            foreach (ListViewItem item in _view.ListView1.Items)
+            foreach (ListViewItem item in _view.ClientListView.Items)
             {
                 if (item.SubItems[1].Text == gatewayIpAddress.ToString())
                 {
@@ -128,12 +128,12 @@ namespace CSArp
 
             var targetlist = new Dictionary<IPAddress, PhysicalAddress>();
             var parseindex = 0;
-            foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
+            foreach (ListViewItem listitem in _view.ClientListView.SelectedItems)
             {
                 targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
                 _ = _view.MainForm.BeginInvoke(new Action(() =>
                   {
-                      _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
+                      _view.ClientListView.SelectedItems[parseindex++].SubItems[3].Text = "Off";
                   }));
             }
             DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
@@ -145,7 +145,7 @@ namespace CSArp
         public void ReconnectClients() //selective reconnection not availabe at this time and frankly, not that useful
         {
             DisconnectReconnect.Reconnect();
-            foreach (ListViewItem entry in _view.ListView1.Items)
+            foreach (ListViewItem entry in _view.ClientListView.Items)
             {
                 entry.SubItems[3].Text = "On";
             }
@@ -157,12 +157,12 @@ namespace CSArp
         /// </summary>
         public void SetSavedInterface()
         {
-            _view.ToolStripComboBoxDeviceList.Text = ApplicationSettingsClass.GetSavedPreferredInterfaceFriendlyName();
+            _view.ToolStripComboBoxNetworkDeviceList.Text = ApplicationSettingsClass.GetSavedPreferredInterfaceFriendlyName();
         }
 
         public void SetFriendlyName()
         {
-            selectedInterfaceFriendlyName = _view.ToolStripComboBoxDeviceList.Text;
+            selectedInterfaceFriendlyName = _view.ToolStripComboBoxNetworkDeviceList.Text;
         }
 
         public void GetGatewayInformation()
@@ -208,9 +208,9 @@ namespace CSArp
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (_view.ListView1.SelectedItems.Count == 1)
+                if (_view.ClientListView.SelectedItems.Count == 1)
                 {
-                    _view.ListView1.SelectedItems[0].SubItems[4].Text = _view.ToolStripTextBoxClientName.Text;
+                    _view.ClientListView.SelectedItems[0].SubItems[4].Text = _view.ToolStripTextBoxClientName.Text;
                     _view.ToolStripTextBoxClientName.Text = "";
                 }
             }
@@ -221,7 +221,7 @@ namespace CSArp
         }
         public void ToolStripSaveClicked()
         {
-            if (ApplicationSettingsClass.SaveSettings(_view.ListView1, _view.ToolStripComboBoxDeviceList.Text))
+            if (ApplicationSettingsClass.SaveSettings(_view.ClientListView, _view.ToolStripComboBoxNetworkDeviceList.Text))
             {
                 _view.ToolStripStatus.Text = "Settings saved!";
             }
@@ -235,12 +235,12 @@ namespace CSArp
             if (_view.ShowLogToolStripMenuItem.Checked == false)
             {
                 _view.LogRichTextBox.Visible = false;
-                _view.ListView1.Height = _view.MainForm.Height - 93;
+                _view.ClientListView.Height = _view.MainForm.Height - 93;
             }
             else
             {
                 _view.LogRichTextBox.Visible = true;
-                _view.ListView1.Height = _view.MainForm.Height - 184;
+                _view.ClientListView.Height = _view.MainForm.Height - 184;
             }
         }
         public void SaveLogShowDialogBox()

@@ -15,7 +15,7 @@ namespace CSArp
 
 
         #region IView members
-        public ListView ListView1
+        public ListView ClientListView
         {
             get
             {
@@ -29,7 +29,7 @@ namespace CSArp
                 return toolStripStatus;
             }
         }
-        public ToolStripComboBox ToolStripComboBoxDeviceList
+        public ToolStripComboBox ToolStripComboBoxNetworkDeviceList
         {
             get
             {
