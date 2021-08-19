@@ -29,7 +29,7 @@ namespace CSArp
         /// </summary>
         /// <param name="view"></param>
         /// <param name="interfacefriendlyname"></param>
-        public static void GetAllClients(IView view, string interfacefriendlyname)
+        public static void GetAllClients(IView view, string interfacefriendlyname, IPAddress gatewayIp)
         {
             DebugOutputClass.Print(view, "Refresh client list");
             #region initialization
@@ -43,7 +43,12 @@ namespace CSArp
              {
                  try
                  {
-                     foreach (var ipAddress in subnet.ToList())
+                     var addressList = new List<IPAddress> {
+                                gatewayIp
+                            }; // Ensure the ARP request is sent to gateway first
+                     addressList.AddRange(subnet.ToList());
+
+                     foreach (var ipAddress in addressList)
                      {
                          var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
                          var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
@@ -91,7 +96,7 @@ namespace CSArp
                     stopwatch.Stop();
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count.ToString() + " device(s) found"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
-                    BackgroundScanStart(view, interfacefriendlyname); //start passive monitoring
+                    BackgroundScanStart(view, interfacefriendlyname, gatewayIp); //start passive monitoring
                 }
                 catch (PcapException ex)
                 {
@@ -111,7 +116,7 @@ namespace CSArp
         /// <summary>
         /// Actively monitor ARP packets for signs of new clients after GetAllClients active scan is done
         /// </summary>
-        public static void BackgroundScanStart(IView view, string interfacefriendlyname)
+        public static void BackgroundScanStart(IView view, string interfacefriendlyname, IPAddress gatewayIp)
         {
             try
             {
@@ -122,7 +127,12 @@ namespace CSArp
                     {
                         while (capturedevice != null)
                         {
-                            foreach (var ipAddress in subnet.ToList())
+                            var addressList = new List<IPAddress> {
+                                gatewayIp
+                            }; // Ensure the ARP request is sent to gateway first
+                            addressList.AddRange(subnet.ToList());
+
+                            foreach (var ipAddress in addressList)
                             {
                                 var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
                                 var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
@@ -152,7 +162,10 @@ namespace CSArp
                     {
                         DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
                         clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
-                        _ = view.ListView1.Invoke(new Action(() => view.ListView1.Items.Add(new ListViewItem(new string[] { (clientlist.Count).ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }))));
+                        _ = view.ListView1.Invoke(new Action(() =>
+                        {
+                            _ = view.ListView1.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                        }));
                         _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
                     }
                 };
@@ -164,7 +177,6 @@ namespace CSArp
             {
                 DebugOutputClass.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
-
         }
 
         /// <summary>
