@@ -103,22 +103,20 @@ namespace CSArp
 
         private void aboutCSArpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controller.ShowAboutBox();
+            _ = MessageBox.Show("Author : globalpolicy\nContact : yciloplabolg@gmail.com\nBlog : c0dew0rth.blogspot.com\nGithub : globalpolicy\nContributions are welcome!\n\nContributors:\nZafer Balkan : zafer@zaferbalkan.com", "About CSArp", MessageBoxButtons.OK);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controller.EndApplication();
+            Environment.Exit(0);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            _controller.AttachOnExitEventHandler();
             _controller.PopulateInterfaces();
             _controller.SetSavedInterface();
             _controller.SetFriendlyName();
             _controller.GetGatewayInformation();
-            _controller.InitializeNotifyIcon();
         }
 
         private void cutoffToolStripMenuItem_Click(object sender, EventArgs e)
@@ -133,37 +131,66 @@ namespace CSArp
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            _controller.FormResized(sender, e);
+            if (MainForm.WindowState == FormWindowState.Minimized)
+            {
+                NotifyIcon1.Visible = true;
+                MainForm.Hide();
+            }
         }
 
         private void toolStripTextBoxClientName_KeyUp(object sender, KeyEventArgs e)
         {
-            _controller.ToolStripTextBoxClientNameKeyUp(sender, e);
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (ClientListView.SelectedItems.Count == 1)
+                {
+                    ClientListView.SelectedItems[0].SubItems[4].Text = ToolStripTextBoxClientName.Text;
+                    ToolStripTextBoxClientName.Text = "";
+                }
+            }
         }
 
         private void toolStripMenuItemMinimize_Click(object sender, EventArgs e)
         {
-            _controller.ToolStripMinimizeClicked();
+            MainForm.WindowState = FormWindowState.Minimized;
         }
 
         private void toolStripMenuItemSaveSettings_Click(object sender, EventArgs e)
         {
-            _controller.ToolStripSaveClicked();
+            if (ApplicationSettingsClass.SaveSettings(ClientListView, ToolStripComboBoxNetworkDeviceList.Text))
+            {
+                ToolStripStatus.Text = "Settings saved!";
+            }
         }
 
         private void showLogToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
         {
-            _controller.ShowLogToolStripMenuItemChecked();
+            if (ShowLogToolStripMenuItem.Checked == false)
+            {
+                LogRichTextBox.Visible = false;
+                ClientListView.Height = MainForm.Height - 93;
+            }
+            else
+            {
+                LogRichTextBox.Visible = true;
+                ClientListView.Height = MainForm.Height - 184;
+            }
         }
 
         private void saveStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controller.SaveLogShowDialogBox();
+            _controller.SaveLog();
         }
 
         private void clearStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controller.ClearLog();
+            LogRichTextBox.Text = "";
+        }
+        private void notifyIcon1_OnMouseClick(object sender, EventArgs e)
+        {
+            NotifyIcon1.Visible = false;
+            MainForm.Show();
+            MainForm.WindowState = FormWindowState.Normal;
         }
     }
 }

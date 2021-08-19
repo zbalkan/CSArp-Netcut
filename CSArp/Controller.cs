@@ -174,74 +174,13 @@ namespace CSArp
             GetClientList.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
         }
 
-        #region Trivial GUI elements control methods
-        public void ShowAboutBox()
-        {
-            _ = MessageBox.Show("Author : globalpolicy\nContact : yciloplabolg@gmail.com\nBlog : c0dew0rth.blogspot.com\nGithub : globalpolicy\nContributions are welcome!", "About CSArp", MessageBoxButtons.OK);
-        }
-        public void EndApplication()
+        public void ExitGracefully()
         {
             ThreadBuffer.Clear();
-            Environment.Exit(0);
+            GetClientList.CloseAllCaptures();
         }
-        public void FormResized(object sender, EventArgs e)
-        {
-            if (_view.MainForm.WindowState == FormWindowState.Minimized)
-            {
-                _view.NotifyIcon1.Visible = true;
-                _view.MainForm.Hide();
-            }
-        }
-        public void InitializeNotifyIcon()
-        {
-            _view.NotifyIcon1.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-            _view.NotifyIcon1.MouseClick += (object sender, MouseEventArgs e) =>
-            {
-                _view.NotifyIcon1.Visible = false;
-                _view.MainForm.Show();
-                _view.MainForm.WindowState = FormWindowState.Normal;
-            };
-        }
-        public void ToolStripTextBoxClientNameKeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                if (_view.ClientListView.SelectedItems.Count == 1)
-                {
-                    _view.ClientListView.SelectedItems[0].SubItems[4].Text = _view.ToolStripTextBoxClientName.Text;
-                    _view.ToolStripTextBoxClientName.Text = "";
-                }
-            }
-        }
-        public void ToolStripMinimizeClicked()
-        {
-            _view.MainForm.WindowState = FormWindowState.Minimized;
-        }
-        public void ToolStripSaveClicked()
-        {
-            if (ApplicationSettingsClass.SaveSettings(_view.ClientListView, _view.ToolStripComboBoxNetworkDeviceList.Text))
-            {
-                _view.ToolStripStatus.Text = "Settings saved!";
-            }
-        }
-        public void AttachOnExitEventHandler()
-        {
-            Application.ApplicationExit += (object sender, EventArgs e) => GetClientList.CloseAllCaptures();
-        }
-        public void ShowLogToolStripMenuItemChecked()
-        {
-            if (_view.ShowLogToolStripMenuItem.Checked == false)
-            {
-                _view.LogRichTextBox.Visible = false;
-                _view.ClientListView.Height = _view.MainForm.Height - 93;
-            }
-            else
-            {
-                _view.LogRichTextBox.Visible = true;
-                _view.ClientListView.Height = _view.MainForm.Height - 184;
-            }
-        }
-        public void SaveLogShowDialogBox()
+
+        public void SaveLog()
         {
             _view.SaveFileDialogLog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
             _view.SaveFileDialogLog.InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -263,13 +202,6 @@ namespace CSArp
             };
             _ = _view.SaveFileDialogLog.ShowDialog();
         }
-
-
-        public void ClearLog()
-        {
-            _view.LogRichTextBox.Text = "";
-        }
-        #endregion
 
         #region Private helper functions
         private static GatewayIPAddressInformation PopulateGatewayInfo(string friendlyname)
