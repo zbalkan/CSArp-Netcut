@@ -39,36 +39,17 @@ namespace CSArp
             #endregion
 
             #region Sending ARP requests to probe for all possible IP addresses on LAN
-            new Thread(() =>
-             {
-                 try
-                 {
-                     var addressList = new List<IPAddress> {
-                                gatewayIp
-                            }; // Ensure the ARP request is sent to gateway first
-                     addressList.AddRange(subnet.ToList());
-
-                     foreach (var ipAddress in addressList)
-                     {
-                         var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
-                         var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
-                         ethernetpacket.PayloadPacket = arprequestpacket;
-                         capturedevice.SendPacket(ethernetpacket);
-                         Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
-                     }
-                 }
-                 catch (Exception ex)
-                 {
-                     DebugOutputClass.Print(view, "Exception at GetClientList.GetAllClients() inside new Thread(()=>{}) while sending packets probably because old thread was still running while capturedevice was closed due to subsequent refresh [" + ex.Message + "]");
-                 }
-             }).Start();
+            ThreadBuffer.Add(new Thread(() =>
+            {
+                InitiateArpRequestQueue(view, gatewayIp);
+            }));
             #endregion
 
             #region Retrieving ARP packets floating around and finding out the senders' IP and MACs
             capturedevice.Filter = "arp";
             RawCapture rawcapture = null;
             long scanduration = 5000;
-            new Thread(() =>
+            ThreadBuffer.Add(new Thread(() =>
             {
                 try
                 {
@@ -109,9 +90,11 @@ namespace CSArp
                     DebugOutputClass.Print(view, ex.Message);
                 }
 
-            }).Start();
+            }));
             #endregion
         }
+
+
 
         /// <summary>
         /// Actively monitor ARP packets for signs of new clients after GetAllClients active scan is done
@@ -121,36 +104,10 @@ namespace CSArp
             try
             {
                 #region Sending ARP requests to probe for all possible IP addresses on LAN
-                new Thread(() =>
+                ThreadBuffer.Add(new Thread(() =>
                 {
-                    try
-                    {
-                        while (capturedevice != null)
-                        {
-                            var addressList = new List<IPAddress> {
-                                gatewayIp
-                            }; // Ensure the ARP request is sent to gateway first
-                            addressList.AddRange(subnet.ToList());
-
-                            foreach (var ipAddress in addressList)
-                            {
-                                var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
-                                var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
-                                ethernetpacket.PayloadPacket = arprequestpacket;
-                                capturedevice.SendPacket(ethernetpacket);
-                                Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
-                            }
-                        }
-                    }
-                    catch (PcapException ex)
-                    {
-                        DebugOutputClass.Print(view, "PcapException @ GetClientList.BackgroundScanStart() probably due to capturedevice being closed by refreshing or by exiting application [" + ex.Message + "]");
-                    }
-                    catch (Exception ex)
-                    {
-                        DebugOutputClass.Print(view, "Exception at GetClientList.BackgroundScanStart() inside new Thread(()=>{}) while sending packets [" + ex.Message + "]");
-                    }
-                }).Start();
+                    InitiateArpRequestQueue(view, gatewayIp);
+                }));
                 #endregion
 
                 #region Assign OnPacketArrival event handler and start capturing
@@ -178,6 +135,8 @@ namespace CSArp
                 DebugOutputClass.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
         }
+
+
 
         /// <summary>
         /// Stops any ongoing capture and closes capturedevice if open
@@ -217,6 +176,49 @@ namespace CSArp
             {
                 subnet = new IPV4Subnet(currentAddress, new IPAddress(addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray())); // Sharppcap returns reversed mask
             }
+        }
+
+        private static void InitiateArpRequestQueue(IView view, IPAddress gatewayIp)
+        {
+            try
+            {
+                while (capturedevice != null)
+                {
+                    var addressList = new List<IPAddress> {
+                                gatewayIp
+                            }; // Ensure the ARP request is sent to gateway first
+                    addressList.AddRange(subnet.ToList());
+
+                    foreach (var ipAddress in addressList)
+                    {
+                        ThreadBuffer.Add(new Thread(() =>
+                        {
+                            SendArpRequest(ipAddress);
+                        }));
+                    }
+                }
+            }
+            catch (PcapException ex)
+            {
+                DebugOutputClass.Print(view, "PcapException @ GetClientList.InitiateArpRequestQueue() probably due to capturedevice being closed by refreshing or by exiting application [" + ex.Message + "]");
+            }
+            catch(OutOfMemoryException ex)
+            {
+                DebugOutputClass.Print(view, $"PcapException @ GetClientList.InitiateArpRequestQueue() out of memory. \nTotal number of threads {ThreadBuffer.Count}\nTotal number of alive threads {ThreadBuffer.AliveCount}\n[" + ex.Message + "]");
+            }
+            catch (Exception ex)
+            {
+                DebugOutputClass.Print(view, "Exception at GetClientList.InitiateArpRequestQueue() inside new Thread(()=>{}) while sending packets [" + ex.Message + "]");
+            }
+        }
+
+        private static void SendArpRequest(IPAddress ipAddress)
+        {
+            var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
+            var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
+            ethernetpacket.PayloadPacket = arprequestpacket;
+            capturedevice.SendPacket(ethernetpacket);
+            Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
         }
 
         /// <summary>

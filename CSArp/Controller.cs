@@ -36,6 +36,7 @@ namespace CSArp
         public Controller(IView view)
         {
             _view = view;
+            ThreadBuffer.Init();
         }
         #endregion
 
@@ -104,20 +105,16 @@ namespace CSArp
                 return;
             }
 
-            // Workaround: Check if gateway is listed in the items, to ensure MAC address is in the list
-            var gatewayFound = false;
-
             foreach (ListViewItem item in _view.ClientListView.Items)
             {
                 if (item.SubItems[1].Text == gatewayIpAddress.ToString())
                 {
-                    gatewayFound = true;
                     gatewayPhysicalAddress = PhysicalAddress.Parse(item.SubItems[2].Text.Replace(":", "-"));
                 }
             }
-            if (!gatewayFound)
+            if (gatewayPhysicalAddress == null)
             {
-                _ = MessageBox.Show("Gateway Physical Address still undiscovered. Please wait and ry again.","Warning",MessageBoxButtons.OK);
+                _ = MessageBox.Show("Gateway Physical Address still undiscovered. Please wait and try again.", "Warning", MessageBoxButtons.OK);
                 return;
             }
 
@@ -184,7 +181,8 @@ namespace CSArp
         }
         public void EndApplication()
         {
-            Application.Exit();
+            ThreadBuffer.Clear();
+            Environment.Exit(0);
         }
         public void FormResized(object sender, EventArgs e)
         {
