@@ -26,6 +26,10 @@ namespace CSArp
     {
         #region fields
         private readonly IView _view;
+        private string selectedInterfaceFriendlyName;
+        private IPAddress gatewayIpAddress;
+        private PhysicalAddress gatewayPhysicalAddress;
+        private GatewayIPAddressInformation gatewayInfo;
         #endregion
 
         #region constructor
@@ -91,22 +95,22 @@ namespace CSArp
         /// </summary>
         public void DisconnectSelectedClients()
         {
-            if (_view.ListView1.SelectedItems.Count > 0)
+            var targetlist = new Dictionary<IPAddress, PhysicalAddress>();
+            var parseindex = 0;
+            foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
             {
-                var targetlist = new Dictionary<IPAddress, PhysicalAddress>();
-                var parseindex = 0;
-                foreach (ListViewItem listitem in _view.ListView1.SelectedItems)
-                {
-                    targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
-                    _ = _view.MainForm.BeginInvoke(new Action(() =>
-                      {
-                          _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
-                          _view.ToolStripStatus.Text = "Arpspoofing active...";
-                      }));
-                }
-                DisconnectReconnect.Disconnect(_view, targetlist, GetGatewayIP(_view.ToolStripComboBoxDeviceList.Text), GetGatewayMAC(_view.ToolStripComboBoxDeviceList.Text), _view.ToolStripComboBoxDeviceList.Text);
-
+                targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
+                _ = _view.MainForm.BeginInvoke(new Action(() =>
+                  {
+                      _view.ListView1.SelectedItems[parseindex++].SubItems[3].Text = "Off";
+                      _view.ToolStripStatus.Text = "Arpspoofing active...";
+                  }));
             }
+            if(gatewayPhysicalAddress == null)
+            {
+                gatewayPhysicalAddress = GetGatewayMAC();
+            }
+            DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
         }
 
         /// <summary>
@@ -130,7 +134,23 @@ namespace CSArp
             _view.ToolStripComboBoxDeviceList.Text = ApplicationSettingsClass.GetSavedPreferredInterfaceFriendlyName();
         }
 
+        public void SetFriendlyName()
+        {
+            selectedInterfaceFriendlyName = _view.ToolStripComboBoxDeviceList.Text;
+        }
 
+        public void GetGatewayInformation()
+        {
+            if (string.IsNullOrEmpty(selectedInterfaceFriendlyName))
+            {
+                return;
+            }
+
+            gatewayInfo = PopulateGatewayInfo(selectedInterfaceFriendlyName);
+            gatewayIpAddress = gatewayInfo.Address;
+            gatewayPhysicalAddress = GetGatewayMAC();
+            GetClientList.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
+        }
 
         #region Trivial GUI elements control methods
         public void ShowAboutBox()
@@ -229,57 +249,25 @@ namespace CSArp
         #endregion
 
         #region Private helper functions
-        /// <summary>
-        /// Return the gateway IPAddress of the selected network interface's
-        /// </summary>
-        /// <param name="friendlyname">The friendly name of the selected network interface</param>
-        /// <returns>Returns the gateway IPAddress of the selected network interface's</returns>
-        private IPAddress GetGatewayIP(string friendlyname)
+        private static GatewayIPAddressInformation PopulateGatewayInfo(string friendlyname)
         {
-            IPAddress retval = null;
-            var interfacename = "";
-            foreach (var capturedevice in CaptureDeviceList.Instance)
+            if (string.IsNullOrEmpty(friendlyname))
             {
-                if (capturedevice is WinPcapDevice winpcapdevice)
-                {
-                    if (winpcapdevice.Interface.FriendlyName == friendlyname)
-                    {
-                        interfacename = winpcapdevice.Interface.Name;
-                    }
-                }
-                else if (capturedevice is AirPcapDevice airpcapdevice)
-                {
-                    if (airpcapdevice.Interface.FriendlyName == friendlyname)
-                    {
-                        interfacename = airpcapdevice.Interface.Name;
-                    }
-                }
+                throw new ArgumentException($"'{nameof(friendlyname)}' cannot be null or empty.", nameof(friendlyname));
             }
-            if (interfacename != "")
-            {
-                foreach (var networkinterface in NetworkInterface.GetAllNetworkInterfaces())
-                {
-                    if (networkinterface.Name == friendlyname)
-                    {
-                        foreach (var gateway in networkinterface.GetIPProperties().GatewayAddresses)
-                        {
-                            if (gateway.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) //filter ipv4 gateway ip address
-                            {
-                                retval = gateway.Address;
-                            }
-                        }
-                    }
-                }
-            }
-            return retval;
+
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            
+            return interfaces.FirstOrDefault(i => i.Name == friendlyname).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
+            == System.Net.Sockets.AddressFamily.InterNetwork);
         }
-        private PhysicalAddress GetGatewayMAC(string friendlyname)
+
+        private PhysicalAddress GetGatewayMAC()
         {
             PhysicalAddress retval = null;
-            var gatewayip = GetGatewayIP(friendlyname).ToString();
             foreach (ListViewItem listviewitem in _view.ListView1.Items)
             {
-                if (listviewitem.SubItems[1].Text == gatewayip)
+                if (listviewitem.SubItems[1].Text == gatewayIpAddress.ToString())
                 {
                     retval = PhysicalAddress.Parse(listviewitem.SubItems[2].Text.Replace(":", "-"));
                 }

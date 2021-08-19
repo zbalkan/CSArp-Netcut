@@ -96,6 +96,8 @@ namespace CSArp
 
         private void toolStripMenuItemRefreshClients_Click(object sender, EventArgs e)
         {
+            _controller.SetFriendlyName();
+            _controller.GetGatewayInformation();
             _controller.RefreshClients();
         }
 
@@ -114,6 +116,8 @@ namespace CSArp
             _controller.AttachOnExitEventHandler();
             _controller.PopulateInterfaces();
             _controller.SetSavedInterface();
+            _controller.SetFriendlyName();
+            _controller.GetGatewayInformation();
             _controller.InitializeNotifyIcon();
         }
 
