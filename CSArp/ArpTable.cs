@@ -1,25 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Net;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 namespace CSArp
 {
-    public class ArpTable
+    public sealed class ArpTable
     {
         public static ArpTable Instance
         {
             get
             {
-                return _instance ?? new ArpTable();
+                return lazy.Value;
             }
         }
 
         public int Count { get { return _dictionary.Count; } }
 
-        private static readonly ArpTable _instance;
+        private static readonly Lazy<ArpTable> lazy = new Lazy<ArpTable>(() => new ArpTable());
+
         private readonly ConcurrentDictionary<IPAddress, PhysicalAddress> _dictionary;
 
         private ArpTable()

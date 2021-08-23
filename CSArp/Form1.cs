@@ -23,7 +23,7 @@ namespace CSArp
         {
             get
             {
-                return listView1;
+                return clientListView;
             }
         }
         public ToolStripStatusLabel ToolStripStatus
@@ -128,7 +128,6 @@ namespace CSArp
         {
             EnumerateNetworkAdaptersforMenu();
             SetSavedInterface();
-            _controller.GetGatewayInformation();
         }
 
         private void cutoffToolStripMenuItem_Click(object sender, EventArgs e)
@@ -156,7 +155,7 @@ namespace CSArp
             {
                 if (ClientListView.SelectedItems.Count == 1)
                 {
-                    ClientListView.SelectedItems[0].SubItems[4].Text = ToolStripTextBoxClientName.Text;
+                    ClientListView.SelectedItems[0].SubItems[3].Text = ToolStripTextBoxClientName.Text;
                     ToolStripTextBoxClientName.Text = "";
                 }
             }
@@ -249,7 +248,9 @@ namespace CSArp
         }
         private static string[] EnumerateNetworkAdapters()
         {
-            return NetworkAdapterManager.WinPcapDevices.Select(device => device.Interface.FriendlyName).ToArray();
+            return NetworkAdapterManager.WinPcapDevices.Where(device => !string.IsNullOrEmpty(device.Interface.FriendlyName))
+                                                       .Select(device => device.Interface.FriendlyName)
+                                                       .ToArray();
         }
 
         private void ExitGracefully()

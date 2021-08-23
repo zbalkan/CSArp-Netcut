@@ -87,8 +87,8 @@ namespace CSArp
                 var listviewdictionary = new Dictionary<string, string>();
                 foreach (ListViewItem listviewitem in listview.Items)
                 {
-                    var macaddress = listviewitem.SubItems[2].Text;
-                    var clientname = listviewitem.SubItems[4].Text;
+                    var macaddress = listviewitem.SubItems[1].Text;
+                    var clientname = listviewitem.SubItems[3].Text;
                     if (clientname != "")
                     {
                         if (!listviewdictionary.Contains(new KeyValuePair<string, string>(macaddress, clientname))) //just in case listview has multiple entries though that shouldn't happen

@@ -91,7 +91,6 @@ namespace CSArp
                         _view.ToolStripStatus.Text = "Ready";
                     }));
                     GetClientList.GetAllClients(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
-                    selectedDevice.StartCapture();
                 }
             }
             else
@@ -113,9 +112,9 @@ namespace CSArp
 
             foreach (ListViewItem item in _view.ClientListView.Items)
             {
-                if (item.SubItems[1].Text == gatewayIpAddress.ToString())
+                if (item.SubItems[0].Text == gatewayIpAddress.ToString())
                 {
-                    gatewayPhysicalAddress = PhysicalAddress.Parse(item.SubItems[2].Text.Replace(":", "-"));
+                    gatewayPhysicalAddress = PhysicalAddress.Parse(item.SubItems[1].Text.Replace(":", "-"));
                 }
             }
             if (gatewayPhysicalAddress == null)
@@ -133,10 +132,10 @@ namespace CSArp
             var parseindex = 0;
             foreach (ListViewItem listitem in _view.ClientListView.SelectedItems)
             {
-                targetlist.Add(IPAddress.Parse(listitem.SubItems[1].Text), PhysicalAddress.Parse(listitem.SubItems[2].Text.Replace(":", "-")));
+                targetlist.Add(IPAddress.Parse(listitem.SubItems[0].Text), PhysicalAddress.Parse(listitem.SubItems[1].Text.Replace(":", "-")));
                 _ = _view.MainForm.BeginInvoke(new Action(() =>
                   {
-                      _view.ClientListView.SelectedItems[parseindex++].SubItems[3].Text = "Off";
+                      _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";
                   }));
             }
             DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, SelectedInterfaceFriendlyName);
@@ -150,7 +149,7 @@ namespace CSArp
             DisconnectReconnect.Reconnect();
             foreach (ListViewItem entry in _view.ClientListView.Items)
             {
-                entry.SubItems[3].Text = "On";
+                entry.SubItems[2].Text = "On";
             }
             _view.ToolStripStatus.Text = "Stopped";
         }
