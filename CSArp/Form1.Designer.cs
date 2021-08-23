@@ -19,7 +19,7 @@ namespace CSArp
         {
             if (disposing && (components != null))
             {
-                _controller.ExitGracefully();
+                ExitGracefully();
                 components.Dispose();
             }
             base.Dispose(disposing);

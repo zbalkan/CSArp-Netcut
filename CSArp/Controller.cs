@@ -24,12 +24,16 @@ namespace CSArp
 {
     public class Controller
     {
-        #region fields
+        #region Public properties
+        public string SelectedInterfaceFriendlyName { get; set; }
+        #endregion
+
+        #region Private fields
         private readonly IView _view;
-        private string selectedInterfaceFriendlyName;
         private IPAddress gatewayIpAddress;
         private PhysicalAddress gatewayPhysicalAddress;
         private GatewayIPAddressInformation gatewayInfo;
+
         #endregion
 
         #region constructor
@@ -41,20 +45,11 @@ namespace CSArp
         #endregion
 
         /// <summary>
-        /// Populate the available network cards. Excludes bridged network adapters, since they are not applicable to spoofing scenario
-        /// <see cref="https://github.com/chmorgan/sharppcap/issues/57"/>
-        /// </summary>
-        public void EnumerateNetworkAdaptersforMenu()
-        {
-            _view.ToolStripComboBoxNetworkDeviceList.Items.AddRange(new List<string>(NetworkAdapterManager.WinPcapDevices.Select(device => device.Interface.FriendlyName).ToList()).ToArray());
-        }
-
-        /// <summary>
         /// Populate the LAN clients
         /// </summary>
         public void RefreshClients()
         {
-            if (!string.IsNullOrEmpty(selectedInterfaceFriendlyName)) //if a network interface has been selected
+            if (!string.IsNullOrEmpty(SelectedInterfaceFriendlyName)) //if a network interface has been selected
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
@@ -63,7 +58,7 @@ namespace CSArp
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    GetClientList.GetAllClients(_view, selectedInterfaceFriendlyName, gatewayIpAddress);
+                    GetClientList.GetAllClients(_view, SelectedInterfaceFriendlyName, gatewayIpAddress);
                 }
 
             }
@@ -112,7 +107,7 @@ namespace CSArp
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[3].Text = "Off";
                   }));
             }
-            DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
+            DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, SelectedInterfaceFriendlyName);
         }
 
         /// <summary>
@@ -128,73 +123,17 @@ namespace CSArp
             _view.ToolStripStatus.Text = "Stopped";
         }
 
-        /// <summary>
-        /// Sets the text of interface list combobox to saved value if present
-        /// </summary>
-        public void SetSavedInterface()
-        {
-            _view.ToolStripComboBoxNetworkDeviceList.Text = ApplicationSettings.GetSavedPreferredInterfaceFriendlyName() ?? string.Empty;
-        }
-
-        public void SetFriendlyName()
-        {
-            selectedInterfaceFriendlyName = _view.ToolStripComboBoxNetworkDeviceList.Text;
-        }
-
         public void GetGatewayInformation()
         {
-            if (string.IsNullOrEmpty(selectedInterfaceFriendlyName))
+            if (string.IsNullOrEmpty(SelectedInterfaceFriendlyName))
             {
                 return;
             }
 
-            gatewayInfo = PopulateGatewayInfo(selectedInterfaceFriendlyName);
-            gatewayIpAddress = gatewayInfo.Address;
-            GetClientList.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
-        }
-
-        public void ExitGracefully()
-        {
-            ThreadBuffer.Clear();
-            GetClientList.CloseAllCaptures();
-        }
-
-        public void SaveLog()
-        {
-            _view.SaveFileDialogLog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            _view.SaveFileDialogLog.InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _view.SaveFileDialogLog.FileName = "CSArp-log";
-            _view.SaveFileDialogLog.FileOk += (object sender, System.ComponentModel.CancelEventArgs e) =>
-            {
-                if (_view.SaveFileDialogLog.FileName != "" && !File.Exists(_view.SaveFileDialogLog.FileName))
-                {
-                    try
-                    {
-                        File.WriteAllText(_view.SaveFileDialogLog.FileName, _view.LogRichTextBox.Text);
-                        DebugOutputClass.Print(_view, "Log saved to " + _view.SaveFileDialogLog.FileName);
-                    }
-                    catch (Exception ex)
-                    {
-                        _ = MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            };
-            _ = _view.SaveFileDialogLog.ShowDialog();
-        }
-
-        #region Private helper functions
-        private static GatewayIPAddressInformation PopulateGatewayInfo(string friendlyname)
-        {
-            if (string.IsNullOrEmpty(friendlyname))
-            {
-                throw new ArgumentException($"'{nameof(friendlyname)}' cannot be null or empty.", nameof(friendlyname));
-            }
-
-            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-            return interfaces.FirstOrDefault(i => i.Name == friendlyname).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
+            gatewayInfo = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(i => i.Name == SelectedInterfaceFriendlyName).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
             == System.Net.Sockets.AddressFamily.InterNetwork);
+            gatewayIpAddress = gatewayInfo.Address;
+            GetClientList.PopulateCaptureDeviceInfo(_view, SelectedInterfaceFriendlyName);
         }
-        #endregion
     }
 }

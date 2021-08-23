@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace CSArp
@@ -93,10 +97,12 @@ namespace CSArp
             }
         }
         #endregion
+        #region Event based methods
 
+       
         private void toolStripMenuItemRefreshClients_Click(object sender, EventArgs e)
         {
-            _controller.SetFriendlyName();
+            _controller.SelectedInterfaceFriendlyName = ToolStripComboBoxNetworkDeviceList.Text;
             _controller.GetGatewayInformation();
             _controller.RefreshClients();
         }
@@ -113,9 +119,8 @@ namespace CSArp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            _controller.EnumerateNetworkAdaptersforMenu();
-            _controller.SetSavedInterface();
-            _controller.SetFriendlyName();
+            EnumerateNetworkAdaptersforMenu();
+            SetSavedInterface();
             _controller.GetGatewayInformation();
         }
 
@@ -179,7 +184,7 @@ namespace CSArp
 
         private void saveStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controller.SaveLog();
+            SaveLog();
         }
 
         private void clearStripMenuItem_Click(object sender, EventArgs e)
@@ -192,5 +197,54 @@ namespace CSArp
             MainForm.Show();
             MainForm.WindowState = FormWindowState.Normal;
         }
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Populate the available network cards. Excludes bridged network adapters, since they are not applicable to spoofing scenario
+        /// <see cref="https://github.com/chmorgan/sharppcap/issues/57"/>
+        /// </summary>
+        private void EnumerateNetworkAdaptersforMenu()
+        {
+            ToolStripComboBoxNetworkDeviceList.Items.AddRange(NetworkAdapterManager.WinPcapDevices.Select(device => device.Interface.FriendlyName).ToArray());
+        }
+
+        /// <summary>
+        /// Sets the text of interface list combobox to saved value if present
+        /// </summary>
+        private void SetSavedInterface()
+        {
+            ToolStripComboBoxNetworkDeviceList.Text = ApplicationSettings.GetSavedPreferredInterfaceFriendlyName() ?? string.Empty;
+        }
+
+        private void SaveLog()
+        {
+            SaveFileDialogLog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            SaveFileDialogLog.InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            SaveFileDialogLog.FileName = "CSArp-log";
+            SaveFileDialogLog.FileOk += (object sender, System.ComponentModel.CancelEventArgs e) =>
+            {
+                if (SaveFileDialogLog.FileName != "" && !File.Exists(SaveFileDialogLog.FileName))
+                {
+                    try
+                    {
+                        File.WriteAllText(SaveFileDialogLog.FileName, LogRichTextBox.Text);
+                        DebugOutputClass.Print(this, "Log saved to " + SaveFileDialogLog.FileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        _ = MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            };
+            _ = SaveFileDialogLog.ShowDialog();
+        }
+        private void ExitGracefully()
+        {
+            ThreadBuffer.Clear();
+            GetClientList.CloseAllCaptures();
+        }
+        #endregion
     }
 }
