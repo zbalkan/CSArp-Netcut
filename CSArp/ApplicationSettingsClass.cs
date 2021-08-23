@@ -54,23 +54,23 @@ namespace CSArp
         /// <summary>
         /// Returns the preferred network interface from file
         /// </summary>
-        /// <returns></returns>
+        /// <returns> Returns the name of the saved network adapter name, or null. </returns>
         public static string GetSavedPreferredInterfaceFriendlyName()
         {
-            var retval = "";
+
             try
             {
                 if (File.Exists("CSArp_settings.ini"))
                 {
                     var filecontents = File.ReadAllText("CSArp_settings.ini");
-                    retval = filecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[0].Split('\n')[0];
+                    return filecontents.Split(new string[] { majorDelim }, StringSplitOptions.RemoveEmptyEntries)[0].Split('\n')[0];
                 }
             }
             catch (Exception ex)
             {
                 Debug.Print("Exception in ApplicationSettingsClass.GetSavedPreferredInterfaceFriendlyName\n" + ex.Message);
             }
-            return retval;
+            return null;
         }
 
         /// <summary>
