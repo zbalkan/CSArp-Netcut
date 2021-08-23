@@ -99,12 +99,19 @@ namespace CSArp
         #endregion
         #region Event based methods
 
-       
+
         private void toolStripMenuItemRefreshClients_Click(object sender, EventArgs e)
         {
-            _controller.SelectedInterfaceFriendlyName = ToolStripComboBoxNetworkDeviceList.Text;
-            _controller.GetGatewayInformation();
-            _controller.RefreshClients();
+            if (string.IsNullOrEmpty(ToolStripComboBoxNetworkDeviceList.Text))
+            {
+                _ = MessageBox.Show("Pick a device before a scan.");
+            }
+            else
+            {
+                _controller.SelectedInterfaceFriendlyName = ToolStripComboBoxNetworkDeviceList.Text;
+                _controller.GetGatewayInformation();
+                _controller.RefreshClients();
+            }
         }
 
         private void aboutCSArpToolStripMenuItem_Click(object sender, EventArgs e)
@@ -207,7 +214,7 @@ namespace CSArp
         /// </summary>
         private void EnumerateNetworkAdaptersforMenu()
         {
-            ToolStripComboBoxNetworkDeviceList.Items.AddRange(NetworkAdapterManager.WinPcapDevices.Select(device => device.Interface.FriendlyName).ToArray());
+            ToolStripComboBoxNetworkDeviceList.Items.AddRange(EnumerateNetworkAdapters());
         }
 
         /// <summary>
@@ -240,10 +247,15 @@ namespace CSArp
             };
             _ = SaveFileDialogLog.ShowDialog();
         }
+        private static string[] EnumerateNetworkAdapters()
+        {
+            return NetworkAdapterManager.WinPcapDevices.Select(device => device.Interface.FriendlyName).ToArray();
+        }
+
         private void ExitGracefully()
         {
             ThreadBuffer.Clear();
-            GetClientList.CloseAllCaptures();
+            _controller.StopCapture();
         }
         #endregion
     }

@@ -25,15 +25,47 @@ namespace CSArp
     public class Controller
     {
         #region Public properties
-        public string SelectedInterfaceFriendlyName { get; set; }
+        public string SelectedInterfaceFriendlyName
+        {
+            get
+            {
+                return selectedInterfaceFriendlyName;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(value);
+                }
+
+                selectedInterfaceFriendlyName = value;
+                if (selectedDevice != null && selectedDevice.Opened)
+                {
+                    try
+                    {
+                        selectedDevice.StopCapture(); //stop previous capture
+                        selectedDevice.Close(); //close previous instances
+                    }
+                    catch (PcapException ex)
+                    {
+                        DebugOutputClass.Print(_view, "Exception at GetAllClients while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
+                    }
+                }
+                selectedDevice = NetworkAdapterManager.WinPcapDevices.Where(dev => dev.Interface.FriendlyName != null)
+                                                                     .FirstOrDefault(dev => dev.Interface.FriendlyName.Equals(selectedInterfaceFriendlyName));
+            }
+        }
         #endregion
 
         #region Private fields
         private readonly IView _view;
-        private IPAddress gatewayIpAddress;
+        private IPAddress currentAddress = null;
+        private IPAddress gatewayIpAddress = null;
         private PhysicalAddress gatewayPhysicalAddress;
         private GatewayIPAddressInformation gatewayInfo;
-
+        private WinPcapDevice selectedDevice = null;
+        private string selectedInterfaceFriendlyName;
+        private IPV4Subnet subnet;
         #endregion
 
         #region constructor
@@ -58,9 +90,9 @@ namespace CSArp
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    GetClientList.GetAllClients(_view, SelectedInterfaceFriendlyName, gatewayIpAddress);
+                    GetClientList.GetAllClients(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
+                    selectedDevice.StartCapture();
                 }
-
             }
             else
             {
@@ -125,15 +157,41 @@ namespace CSArp
 
         public void GetGatewayInformation()
         {
-            if (string.IsNullOrEmpty(SelectedInterfaceFriendlyName))
-            {
-                return;
-            }
-
             gatewayInfo = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(i => i.Name == SelectedInterfaceFriendlyName).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
             == System.Net.Sockets.AddressFamily.InterNetwork);
             gatewayIpAddress = gatewayInfo.Address;
-            GetClientList.PopulateCaptureDeviceInfo(_view, SelectedInterfaceFriendlyName);
+            PopulateCaptureDeviceInfo();
+        }
+
+        private void PopulateCaptureDeviceInfo()
+        {
+
+            var clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
+
+            selectedDevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
+
+            // Getting a readonly collection populated with addreses.
+            // If it is an IPv4 interface, you can get IP Address, subnet mask etc.
+            // if not, there is only physical address. Therefore, we are checking these here.
+            //
+            // Beware that AirPcap is an obsolete protocol. Therefore we are using only winpcap devices for now.
+            // TODO: Add Mode selection: WinPcap & AirPcap.
+            var ipv4Addresses = selectedDevice.Addresses.FirstOrDefault(addr => addr.Addr.ipAddress != null);
+            var currentAddress = ipv4Addresses.Addr.ipAddress;
+            var subnetMask = new IPAddress(ipv4Addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray());// Sharppcap returns reversed mask
+            if (subnet == null)
+            {
+                subnet = new IPV4Subnet(currentAddress, subnetMask);
+            }
+        }
+
+        public void StopCapture()
+        {
+            if (selectedDevice.Opened)
+            {
+                selectedDevice.StopCapture();
+                selectedDevice.Close();
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using SharpPcap;
+using SharpPcap.WinPcap;
 using PacketDotNet;
 using System.Diagnostics;
 using System.Threading;
@@ -19,17 +20,15 @@ namespace CSArp
 {
     public static class GetClientList
     {
-        private static ICaptureDevice capturedevice;
-        private static IPAddress currentAddress;
-        private static IPV4Subnet subnet;
+        // TODO: Add a singleton for ARP Cache
         private static Dictionary<IPAddress, PhysicalAddress> clientlist;
 
         /// <summary>
         /// Populates listview with machines connected to the LAN
         /// </summary>
         /// <param name="view"></param>
-        /// <param name="interfacefriendlyname"></param>
-        public static void GetAllClients(IView view, string interfacefriendlyname, IPAddress gatewayIp)
+        /// <param name="selectedDevice"></param>
+        public static void GetAllClients(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
         {
             DebugOutputClass.Print(view, "Refresh client list");
             #region initialization
@@ -41,12 +40,12 @@ namespace CSArp
             #region Sending ARP requests to probe for all possible IP addresses on LAN
             ThreadBuffer.Add(new Thread(() =>
             {
-                InitiateArpRequestQueue(view, gatewayIp);
+                InitiateArpRequestQueue(view, selectedDevice, sourceAddress, gatewayIp, subnet);
             }));
             #endregion
 
             #region Retrieving ARP packets floating around and finding out the senders' IP and MACs
-            capturedevice.Filter = "arp";
+            selectedDevice.Filter = "arp";
             RawCapture rawcapture = null;
             long scanduration = 5000;
             ThreadBuffer.Add(new Thread(() =>
@@ -55,7 +54,7 @@ namespace CSArp
                 {
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
-                    while ((rawcapture = capturedevice.GetNextPacket()) != null && stopwatch.ElapsedMilliseconds <= scanduration)
+                    while ((rawcapture = selectedDevice.GetNextPacket()) != null && stopwatch.ElapsedMilliseconds <= scanduration)
                     {
                         var packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
                         var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
@@ -64,9 +63,9 @@ namespace CSArp
                             DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
                             clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
-                              {
-                                  _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
-                              }));
+                            {
+                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                            }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
                         //int percentageprogress = (int)((float)stopwatch.ElapsedMilliseconds / scanduration * 100);
@@ -77,7 +76,7 @@ namespace CSArp
                     stopwatch.Stop();
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count.ToString() + " device(s) found"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
-                    BackgroundScanStart(view, interfacefriendlyname, gatewayIp); //start passive monitoring
+                    BackgroundScanStart(view, selectedDevice, sourceAddress, gatewayIp, subnet); //start passive monitoring
                 }
                 catch (PcapException ex)
                 {
@@ -97,23 +96,22 @@ namespace CSArp
         /// <summary>
         /// Actively monitor ARP packets for signs of new clients after GetAllClients active scan is done
         /// </summary>
-        public static void BackgroundScanStart(IView view, string interfacefriendlyname, IPAddress gatewayIp)
+        public static void BackgroundScanStart(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
         {
             try
             {
                 #region Sending ARP requests to probe for all possible IP addresses on LAN
                 ThreadBuffer.Add(new Thread(() =>
                 {
-                    InitiateArpRequestQueue(view, gatewayIp);
+                    InitiateArpRequestQueue(view, selectedDevice, sourceAddress, gatewayIp, subnet);
                 }));
                 #endregion
 
                 #region Assign OnPacketArrival event handler and start capturing
-                capturedevice.OnPacketArrival += (object sender, CaptureEventArgs e) =>
+                selectedDevice.OnPacketArrival += (object sender, CaptureEventArgs e) =>
                 {
-                    ParseArpResponse(view, e);
+                    ParseArpResponse(view, subnet, e);
                 };
-                capturedevice.StartCapture();
                 #endregion
 
             }
@@ -123,81 +121,28 @@ namespace CSArp
             }
         }
 
-        /// <summary>
-        /// Stops any ongoing capture and closes capturedevice if open
-        /// </summary>
-        public static void CloseAllCaptures()
+        private static void InitiateArpRequestQueue(IView view, WinPcapDevice device, IPAddress sourceAddress ,IPAddress gatewayIp, IPV4Subnet subnet)
         {
             try
             {
-                capturedevice.StopCapture();
-                capturedevice.Close();
-            }
-            catch { }
-        }
-
-        public static void PopulateCaptureDeviceInfo(IView view, string interfacefriendlyname)
-        {
-            if (capturedevice != null)
-            {
-                try
-                {
-                    capturedevice.StopCapture(); //stop previous capture
-                    capturedevice.Close(); //close previous instances
-                }
-                catch (PcapException ex)
-                {
-                    DebugOutputClass.Print(view, "Exception at GetAllClients while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
-                }
-            }
-            clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
-            var winpcapDevices = NetworkAdapterManager.WinPcapDevices;
-            capturedevice = winpcapDevices.Where(dev => dev.Interface.FriendlyName != null)
-                                          .FirstOrDefault(dev => dev.Interface.FriendlyName.Equals(interfacefriendlyname));
-
-            capturedevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
-
-            // Getting a readonly collection populated with addreses.
-            // If it is an IPv4 interface, you can get IP Address, subnet mask etc.
-            // if not, there is only physical address. Therefore, we are checking these here.
-            //
-            // Beware that AirPcap is an obsolete protocol. Therefore we are using only winpcap devices for now.
-            // TODO: Add Mode selection: WinPcap & AirPcap.
-            var addresses = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses;
-            var ipv4Addresses = addresses.FirstOrDefault(addr => addr.Addr.ipAddress != null);
-            currentAddress = ipv4Addresses.Addr.ipAddress;
-            var subnetMask = new IPAddress(ipv4Addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray());// Sharppcap returns reversed mask
-            if (subnet == null)
-            {
-                subnet = new IPV4Subnet(currentAddress, subnetMask);
-            }
-        }
-
-        private static void InitiateArpRequestQueue(IView view, IPAddress gatewayIp)
-        {
-            try
-            {
-                while (capturedevice != null)
-                {
-                    var addressList = new List<IPAddress> {
+                var addressList = new List<IPAddress> {
                                 gatewayIp
                             }; // Ensure the ARP request is sent to gateway first
-                    addressList.AddRange(subnet.ToList());
+                addressList.AddRange(subnet.ToList());
 
-                    foreach (var ipAddress in addressList)
+                foreach (var targetIpAddress in addressList)
+                {
+                    ThreadBuffer.Add(new Thread(() =>
                     {
-                        ThreadBuffer.Add(new Thread(() =>
-                        {
-                            SendArpRequest(ipAddress);
-                        }));
-                    }
+                        SendArpRequest(device, sourceAddress, targetIpAddress);
+                    }));
                 }
             }
             catch (PcapException ex)
             {
                 DebugOutputClass.Print(view, "PcapException @ GetClientList.InitiateArpRequestQueue() probably due to capturedevice being closed by refreshing or by exiting application [" + ex.Message + "]");
             }
-            catch(OutOfMemoryException ex)
+            catch (OutOfMemoryException ex)
             {
                 DebugOutputClass.Print(view, $"PcapException @ GetClientList.InitiateArpRequestQueue() out of memory. \nTotal number of threads {ThreadBuffer.Count}\nTotal number of alive threads {ThreadBuffer.AliveCount}\n[" + ex.Message + "]");
             }
@@ -207,16 +152,16 @@ namespace CSArp
             }
         }
 
-        private static void SendArpRequest(IPAddress ipAddress)
+        private static void SendArpRequest(WinPcapDevice device, IPAddress sourceIpAddress, IPAddress targetIpAddress)
         {
-            var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), ipAddress, capturedevice.MacAddress, currentAddress);
-            var ethernetpacket = new EthernetPacket(capturedevice.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
+            var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), targetIpAddress, device.MacAddress, sourceIpAddress);
+            var ethernetpacket = new EthernetPacket(device.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
             ethernetpacket.PayloadPacket = arprequestpacket;
-            capturedevice.SendPacket(ethernetpacket);
-            Debug.WriteLine("ARP request is sent to: {0}", ipAddress);
+            device.SendPacket(ethernetpacket);
+            Debug.WriteLine("ARP request is sent to: {0}", targetIpAddress);
         }
 
-        private static void ParseArpResponse(IView view, CaptureEventArgs e)
+        private static void ParseArpResponse(IView view, IPV4Subnet subnet, CaptureEventArgs e)
         {
             var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
@@ -253,7 +198,6 @@ namespace CSArp
             {
                 throw ex;
             }
-
         }
     }
 }
