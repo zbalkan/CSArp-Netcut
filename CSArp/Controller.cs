@@ -48,7 +48,7 @@ namespace CSArp
                     }
                     catch (PcapException ex)
                     {
-                        DebugOutputClass.Print(_view, "Exception at StartForegroundScan while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
+                        DebugOutput.Print(_view, "Exception at StartForegroundScan while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
                     }
                 }
                 selectedDevice = NetworkAdapterManager.WinPcapDevices.Where(dev => dev.Interface.FriendlyName != null)

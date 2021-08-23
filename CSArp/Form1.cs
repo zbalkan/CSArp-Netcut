@@ -236,7 +236,7 @@ namespace CSArp
                     try
                     {
                         File.WriteAllText(SaveFileDialogLog.FileName, LogRichTextBox.Text);
-                        DebugOutputClass.Print(this, "Log saved to " + SaveFileDialogLog.FileName);
+                        DebugOutput.Print(this, "Log saved to " + SaveFileDialogLog.FileName);
                     }
                     catch (Exception ex)
                     {

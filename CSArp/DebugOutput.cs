@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CSArp
 {
-    public static class DebugOutputClass
+    public static class DebugOutput
     {
         public static void Print(IView view, string output)
         {

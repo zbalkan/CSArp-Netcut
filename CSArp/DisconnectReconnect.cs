@@ -36,7 +36,7 @@ namespace CSArp
         {
 
             disengageflag = false;
-            DebugOutputClass.Print(view, "Spoofing target " + physicalAddress.ToString() + " @ " + ipAddress.ToString());
+            DebugOutput.Print(view, "Spoofing target " + physicalAddress.ToString() + " @ " + ipAddress.ToString());
             try
             {
                 while (!disengageflag)
@@ -46,9 +46,9 @@ namespace CSArp
             }
             catch (PcapException ex)
             {
-                DebugOutputClass.Print(view, "PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
+                DebugOutput.Print(view, "PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
             }
-            DebugOutputClass.Print(view, "Spoofing thread @ DisconnectReconnect.Disconnect() for " + physicalAddress.ToString() + " @ " + ipAddress.ToString() + " is terminating.");
+            DebugOutput.Print(view, "Spoofing thread @ DisconnectReconnect.Disconnect() for " + physicalAddress.ToString() + " @ " + ipAddress.ToString() + " is terminating.");
 
         }
 

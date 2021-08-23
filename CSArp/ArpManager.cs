@@ -27,7 +27,7 @@ namespace CSArp
         /// <param name="selectedDevice"></param>
         public static void StartForegroundScan(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
         {
-            DebugOutputClass.Print(view, "Refresh client list");
+            DebugOutput.Print(view, "Refresh client list");
             #region initialization
             _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Please wait..."));
             _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
@@ -60,7 +60,7 @@ namespace CSArp
                         var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
                         if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
-                            DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
+                            DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
                             ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
                             {
@@ -80,13 +80,13 @@ namespace CSArp
                 }
                 catch (PcapException ex)
                 {
-                    DebugOutputClass.Print(view, "PcapException @ GetClientList.StartForegroundScan() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
+                    DebugOutput.Print(view, "PcapException @ GetClientList.StartForegroundScan() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Refresh for scan"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
                 }
                 catch (Exception ex)
                 {
-                    DebugOutputClass.Print(view, ex.Message);
+                    DebugOutput.Print(view, ex.Message);
                 }
 
             }));
@@ -117,7 +117,7 @@ namespace CSArp
             }
             catch (Exception ex)
             {
-                DebugOutputClass.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
+                DebugOutput.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
         }
 
@@ -140,15 +140,15 @@ namespace CSArp
             }
             catch (PcapException ex)
             {
-                DebugOutputClass.Print(view, "PcapException @ GetClientList.InitiateArpRequestQueue() probably due to capturedevice being closed by refreshing or by exiting application [" + ex.Message + "]");
+                DebugOutput.Print(view, "PcapException @ GetClientList.InitiateArpRequestQueue() probably due to capturedevice being closed by refreshing or by exiting application [" + ex.Message + "]");
             }
             catch (OutOfMemoryException ex)
             {
-                DebugOutputClass.Print(view, $"PcapException @ GetClientList.InitiateArpRequestQueue() out of memory. \nTotal number of threads {ThreadBuffer.Count}\nTotal number of alive threads {ThreadBuffer.AliveCount}\n[" + ex.Message + "]");
+                DebugOutput.Print(view, $"PcapException @ GetClientList.InitiateArpRequestQueue() out of memory. \nTotal number of threads {ThreadBuffer.Count}\nTotal number of alive threads {ThreadBuffer.AliveCount}\n[" + ex.Message + "]");
             }
             catch (Exception ex)
             {
-                DebugOutputClass.Print(view, "Exception at GetClientList.InitiateArpRequestQueue() inside new Thread(()=>{}) while sending packets [" + ex.Message + "]");
+                DebugOutput.Print(view, "Exception at GetClientList.InitiateArpRequestQueue() inside new Thread(()=>{}) while sending packets [" + ex.Message + "]");
             }
         }
 
@@ -167,7 +167,7 @@ namespace CSArp
             var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
             if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
             {
-                DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
+                DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
                 ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                 _ = view.ClientListView.Invoke(new Action(() =>
                 {
