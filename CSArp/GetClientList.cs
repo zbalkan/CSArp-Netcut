@@ -20,9 +20,6 @@ namespace CSArp
 {
     public static class GetClientList
     {
-        // TODO: Add a singleton for ARP Cache
-        private static Dictionary<IPAddress, PhysicalAddress> clientlist;
-
         /// <summary>
         /// Populates listview with machines connected to the LAN
         /// </summary>
@@ -36,6 +33,9 @@ namespace CSArp
             _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
             view.ClientListView.Items.Clear();
             #endregion
+
+            // Clear ARP table
+            ArpTable.Instance.Clear();
 
             #region Sending ARP requests to probe for all possible IP addresses on LAN
             ThreadBuffer.Add(new Thread(() =>
@@ -58,13 +58,13 @@ namespace CSArp
                     {
                         var packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
                         var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-                        if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
+                        if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
                             DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
-                            clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
+                            ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
                             {
-                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { ArpTable.Instance.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                             }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
@@ -74,7 +74,7 @@ namespace CSArp
                         //Debug.Print(packet.ToString() + "\n");
                     }
                     stopwatch.Stop();
-                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count.ToString() + " device(s) found"));
+                    _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = ArpTable.Instance.Count.ToString() + " device(s) found"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
                     BackgroundScanStart(view, selectedDevice, sourceAddress, gatewayIp, subnet); //start passive monitoring
                 }
@@ -165,15 +165,15 @@ namespace CSArp
         {
             var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-            if (!clientlist.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
+            if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
             {
                 DebugOutputClass.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
-                clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
+                ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                 _ = view.ClientListView.Invoke(new Action(() =>
                 {
-                    _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                    _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { ArpTable.Instance.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                 }));
-                _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
+                _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = ArpTable.Instance.Count + " device(s) found"));
             }
         }
 
