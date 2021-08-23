@@ -153,13 +153,23 @@ namespace CSArp
             clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
             var capturedevicelist = CaptureDeviceList.Instance;
             capturedevicelist.Refresh(); //crucial for reflection of any network changes
-            capturedevice = (from devicex in capturedevicelist where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
+            capturedevice = capturedevicelist
+                .Where(dev => dev is SharpPcap.WinPcap.WinPcapDevice)
+                .Where(dev => (dev as SharpPcap.WinPcap.WinPcapDevice).Interface.FriendlyName != null)
+                .FirstOrDefault(dev => (dev as SharpPcap.WinPcap.WinPcapDevice).Interface.FriendlyName.Equals(interfacefriendlyname));
             capturedevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
-            var addresses = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses[1];
-            currentAddress = addresses.Addr.ipAddress; //possible critical point : Addresses[1] in hardcoding the index for obtaining ipv4 address
+
+            // Getting a readonly collection populated with addreses.
+            // If it is an IPv4 interface, you can get IP Address, subnet mask etc.
+            // if not, there is only physical address. Therefore, we are checking these here.
+            // TODO: There must be a device manager and holding these things from ground up.
+            var addresses = ((SharpPcap.WinPcap.WinPcapDevice)capturedevice).Addresses; 
+            var ipv4Addresses = addresses.FirstOrDefault(addr => addr.Addr.ipAddress != null);
+            currentAddress = ipv4Addresses.Addr.ipAddress;
+            var subnetMask = new IPAddress(ipv4Addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray());// Sharppcap returns reversed mask
             if (subnet == null)
             {
-                subnet = new IPV4Subnet(currentAddress, new IPAddress(addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray())); // Sharppcap returns reversed mask
+                subnet = new IPV4Subnet(currentAddress, subnetMask);
             }
         }
 
