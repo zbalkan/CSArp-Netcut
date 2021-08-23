@@ -18,14 +18,14 @@ using System.Windows.Forms;
 
 namespace CSArp
 {
-    public static class GetClientList
+    public static class ArpManager
     {
         /// <summary>
         /// Populates listview with machines connected to the LAN
         /// </summary>
         /// <param name="view"></param>
         /// <param name="selectedDevice"></param>
-        public static void GetAllClients(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
+        public static void StartForegroundScan(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
         {
             DebugOutputClass.Print(view, "Refresh client list");
             #region initialization
@@ -76,11 +76,11 @@ namespace CSArp
                     stopwatch.Stop();
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = ArpTable.Instance.Count.ToString() + " device(s) found"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 100));
-                    BackgroundScanStart(view, selectedDevice, sourceAddress, gatewayIp, subnet); //start passive monitoring
+                    StartBackgroundScan(view, selectedDevice, sourceAddress, gatewayIp, subnet); //start passive monitoring
                 }
                 catch (PcapException ex)
                 {
-                    DebugOutputClass.Print(view, "PcapException @ GetClientList.GetAllClients() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
+                    DebugOutputClass.Print(view, "PcapException @ GetClientList.StartForegroundScan() @ new Thread(()=>{}) while retrieving packets [" + ex.Message + "]");
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = "Refresh for scan"));
                     _ = view.MainForm.Invoke(new Action(() => view.ToolStripProgressBarScan.Value = 0));
                 }
@@ -94,9 +94,9 @@ namespace CSArp
         }
 
         /// <summary>
-        /// Actively monitor ARP packets for signs of new clients after GetAllClients active scan is done
+        /// Actively monitor ARP packets for signs of new clients after StartForegroundScan active scan is done
         /// </summary>
-        public static void BackgroundScanStart(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
+        public static void StartBackgroundScan(IView view, WinPcapDevice selectedDevice, IPAddress sourceAddress, IPAddress gatewayIp, IPV4Subnet subnet)
         {
             try
             {

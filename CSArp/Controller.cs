@@ -48,7 +48,7 @@ namespace CSArp
                     }
                     catch (PcapException ex)
                     {
-                        DebugOutputClass.Print(_view, "Exception at GetAllClients while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
+                        DebugOutputClass.Print(_view, "Exception at StartForegroundScan while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
                     }
                 }
                 selectedDevice = NetworkAdapterManager.WinPcapDevices.Where(dev => dev.Interface.FriendlyName != null)
@@ -90,7 +90,7 @@ namespace CSArp
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    GetClientList.GetAllClients(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
+                    ArpManager.StartForegroundScan(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
                 }
             }
             else
