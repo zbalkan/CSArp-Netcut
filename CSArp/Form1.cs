@@ -113,7 +113,7 @@ namespace CSArp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            _controller.PopulateInterfaces();
+            _controller.EnumerateNetworkAdaptersforMenu();
             _controller.SetSavedInterface();
             _controller.SetFriendlyName();
             _controller.GetGatewayInformation();

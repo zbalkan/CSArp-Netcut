@@ -68,6 +68,7 @@
     <Compile Include="GetClientList.cs" />
     <Compile Include="IpV4Subnet.cs" />
     <Compile Include="IView.cs" />
+    <Compile Include="NetworkAdapterManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThreadBuffer.cs" />
