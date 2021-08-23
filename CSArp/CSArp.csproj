@@ -58,7 +58,7 @@
     <Compile Include="ApplicationSettings.cs" />
     <Compile Include="ArpTable.cs" />
     <Compile Include="Controller.cs" />
-    <Compile Include="DebugOutputClass.cs" />
+    <Compile Include="DebugOutput.cs" />
     <Compile Include="DisconnectReconnect.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
