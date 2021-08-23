@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace CSArp
 {
-    public static class DisconnectReconnect
+    public static class SpoofingController
     {
         private static Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
         private static bool disengageflag = true;
@@ -17,7 +17,18 @@ namespace CSArp
         public static void Disconnect(IView view, Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, string interfacefriendlyname)
         {
             engagedclientlist = new Dictionary<IPAddress, PhysicalAddress>();
-            capturedevice = (from devicex in CaptureDeviceList.Instance where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
+            IEnumerable<ICaptureDevice> enumerable()
+            {
+                foreach (var devicex in CaptureDeviceList.Instance)
+                {
+                    if (((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname)
+                    {
+                        yield return devicex;
+                    }
+                }
+            }
+
+            capturedevice = enumerable().ToList()[0];
             capturedevice.Open();
             foreach (var target in targetlist)
             {

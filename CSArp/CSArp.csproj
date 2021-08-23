@@ -56,16 +56,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationSettingsClass.cs" />
+    <Compile Include="ArpController.cs" />
+    <Compile Include="ClientDevice.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="DebugOutputClass.cs" />
-    <Compile Include="DisconnectReconnect.cs" />
+    <Compile Include="SpoofingContext.cs" />
+    <Compile Include="SpoofingController.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetClientList.cs" />
+    <Compile Include="ArpScanner.cs" />
+    <Compile Include="IController.cs" />
     <Compile Include="IpV4Subnet.cs" />
     <Compile Include="IView.cs" />
     <Compile Include="Program.cs" />

@@ -79,12 +79,12 @@ namespace CSArp
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
-                    DisconnectReconnect.Reconnect(); // first disengage spoofing threads
+                    SpoofingController.Reconnect(); // first disengage spoofing threads
                     _ = _view.MainForm.BeginInvoke(new Action(() =>
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    GetClientList.GetAllClients(_view, selectedInterfaceFriendlyName, gatewayIpAddress);
+                    ArpScanner.GetAllClients(_view, selectedInterfaceFriendlyName, gatewayIpAddress);
                 }
 
             }
@@ -133,7 +133,7 @@ namespace CSArp
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[3].Text = "Off";
                   }));
             }
-            DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
+            SpoofingController.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedInterfaceFriendlyName);
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace CSArp
         /// </summary>
         public void ReconnectClients() //selective reconnection not availabe at this time and frankly, not that useful
         {
-            DisconnectReconnect.Reconnect();
+            SpoofingController.Reconnect();
             foreach (ListViewItem entry in _view.ClientListView.Items)
             {
                 entry.SubItems[3].Text = "On";
@@ -171,13 +171,13 @@ namespace CSArp
 
             gatewayInfo = PopulateGatewayInfo(selectedInterfaceFriendlyName);
             gatewayIpAddress = gatewayInfo.Address;
-            GetClientList.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
+            ArpScanner.PopulateCaptureDeviceInfo(_view, selectedInterfaceFriendlyName);
         }
 
         public void ExitGracefully()
         {
             ThreadBuffer.Clear();
-            GetClientList.CloseAllCaptures();
+            ArpScanner.CloseAllCaptures();
         }
 
         public void SaveLog()
