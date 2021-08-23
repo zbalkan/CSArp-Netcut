@@ -157,7 +157,7 @@ namespace CSArp
 
         private void toolStripMenuItemSaveSettings_Click(object sender, EventArgs e)
         {
-            if (ApplicationSettingsClass.SaveSettings(ClientListView, ToolStripComboBoxNetworkDeviceList.Text))
+            if (ApplicationSettings.SaveSettings(ClientListView, ToolStripComboBoxNetworkDeviceList.Text))
             {
                 ToolStripStatus.Text = "Settings saved!";
             }

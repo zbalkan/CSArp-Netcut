@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace CSArp
 {
-    public static class ApplicationSettingsClass
+    public static class ApplicationSettings
     {
         /* Settings are stored in CSArp_settings.ini file as follows:
             Wi-Fi

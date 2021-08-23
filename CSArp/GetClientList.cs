@@ -65,7 +65,7 @@ namespace CSArp
                             clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
                               {
-                                  _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                                  _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                               }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
@@ -226,7 +226,7 @@ namespace CSArp
                 clientlist.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                 _ = view.ClientListView.Invoke(new Action(() =>
                 {
-                    _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettingsClass.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                    _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { clientlist.Count.ToString(), arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
                 }));
                 _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = clientlist.Count + " device(s) found"));
             }

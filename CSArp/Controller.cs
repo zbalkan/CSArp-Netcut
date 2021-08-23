@@ -133,7 +133,7 @@ namespace CSArp
         /// </summary>
         public void SetSavedInterface()
         {
-            _view.ToolStripComboBoxNetworkDeviceList.Text = ApplicationSettingsClass.GetSavedPreferredInterfaceFriendlyName() ?? string.Empty;
+            _view.ToolStripComboBoxNetworkDeviceList.Text = ApplicationSettings.GetSavedPreferredInterfaceFriendlyName() ?? string.Empty;
         }
 
         public void SetFriendlyName()
