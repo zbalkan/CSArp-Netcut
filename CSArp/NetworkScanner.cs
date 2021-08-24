@@ -37,10 +37,12 @@ namespace CSArp
 
             // Clear ARP table
             ArpTable.Instance.Clear();
-            StartForegroundScan(view, networkAdapter, gatewayIp);
+
+            // Start Foreground Scan with Timeout involved
+            StartForegroundScan(view, networkAdapter, gatewayIp, 5000);
         }
 
-        private static void StartForegroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
+        private static void StartForegroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp, int foregroundScanTimeout)
         {
             // Obtain subnet information
             var subnet = networkAdapter.ReadCurrentSubnet();
@@ -59,7 +61,6 @@ namespace CSArp
             #region Retrieving ARP packets floating around and finding out the senders' IP and MACs
             networkAdapter.Filter = "arp";
             RawCapture rawcapture = null;
-            long foregroundScanTimeout = 5000;
             ThreadBuffer.Add(new Thread(() =>
             {
                 try
