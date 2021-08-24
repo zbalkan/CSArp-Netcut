@@ -79,18 +79,19 @@ namespace CSArp
         /// <summary>
         /// Populate the LAN clients
         /// </summary>
+        /// // TODO: Use the device interface, not the name
         public void RefreshClients()
         {
             if (!string.IsNullOrEmpty(SelectedInterfaceFriendlyName)) //if a network interface has been selected
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
-                    DisconnectReconnect.Reconnect(); // first disengage spoofing threads
+                    Spoofer.Stop(); // first disengage spoofing threads
                     _ = _view.MainForm.BeginInvoke(new Action(() =>
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    ArpManager.StartForegroundScan(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
+                    NetworkScanner.StartForegroundScan(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
                 }
             }
             else
@@ -138,7 +139,7 @@ namespace CSArp
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";
                   }));
             }
-            DisconnectReconnect.Disconnect(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, SelectedInterfaceFriendlyName);
+            Spoofer.Start(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, SelectedInterfaceFriendlyName);
         }
 
         /// <summary>
@@ -146,7 +147,7 @@ namespace CSArp
         /// </summary>
         public void ReconnectClients() //selective reconnection not availabe at this time and frankly, not that useful
         {
-            DisconnectReconnect.Reconnect();
+            Spoofer.Stop();
             foreach (ListViewItem entry in _view.ClientListView.Items)
             {
                 entry.SubItems[2].Text = "On";

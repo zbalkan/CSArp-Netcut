@@ -8,13 +8,13 @@ using System.Threading;
 
 namespace CSArp
 {
-    public static class DisconnectReconnect
+    public static class Spoofer
     {
         private static Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
         private static bool disengageflag = true;
         private static ICaptureDevice capturedevice;
 
-        public static void Disconnect(IView view, Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, string interfacefriendlyname)
+        public static void Start(IView view, Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, string interfacefriendlyname)
         {
             engagedclientlist = new Dictionary<IPAddress, PhysicalAddress>();
             capturedevice = (from devicex in CaptureDeviceList.Instance where ((SharpPcap.WinPcap.WinPcapDevice)devicex).Interface.FriendlyName == interfacefriendlyname select devicex).ToList()[0];
@@ -52,7 +52,7 @@ namespace CSArp
 
         }
 
-        public static void Reconnect()
+        public static void Stop()
         {
             disengageflag = true;
             if (engagedclientlist != null)

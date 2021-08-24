@@ -18,7 +18,9 @@ using System.Windows.Forms;
 
 namespace CSArp
 {
-    public static class ArpManager
+    // TODO: Add a scanning bool, to set the state for cancellation.
+    // TODO: Remove GUI related code out of the class.
+    public static class NetworkScanner
     {
         /// <summary>
         /// Populates listview with machines connected to the LAN
@@ -37,6 +39,7 @@ namespace CSArp
             // Clear ARP table
             ArpTable.Instance.Clear();
 
+            // TODO: Send and capture ICMP packages for both MAC address and alive status.
             #region Sending ARP requests to probe for all possible IP addresses on LAN
             ThreadBuffer.Add(new Thread(() =>
             {
@@ -120,7 +123,7 @@ namespace CSArp
                 DebugOutput.Print(view, "Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
         }
-
+        // TODO: Start spoofing for devices regarding online status.
         private static void InitiateArpRequestQueue(IView view, WinPcapDevice device, IPAddress sourceAddress ,IPAddress gatewayIp, IPV4Subnet subnet)
         {
             try

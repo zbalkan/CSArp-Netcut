@@ -59,14 +59,14 @@
     <Compile Include="ArpTable.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="DebugOutput.cs" />
-    <Compile Include="DisconnectReconnect.cs" />
+    <Compile Include="Spoofer.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="ArpManager.cs" />
+    <Compile Include="NetworkScanner.cs" />
     <Compile Include="IpV4Subnet.cs" />
     <Compile Include="IView.cs" />
     <Compile Include="NetworkAdapterManager.cs" />
