@@ -16,8 +16,6 @@ namespace CSArp
             _controller = new Controller(this);
         }
 
-
-
         #region IView members
         public ListView ClientListView
         {
@@ -98,8 +96,6 @@ namespace CSArp
         }
         #endregion
         #region Event based methods
-
-
         private void toolStripMenuItemRefreshClients_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(ToolStripComboBoxNetworkDeviceList.Text))
@@ -110,6 +106,7 @@ namespace CSArp
             {
                 _controller.SelectedInterfaceFriendlyName = ToolStripComboBoxNetworkDeviceList.Text;
                 _controller.GetGatewayInformation();
+                _controller.StartCapture();
                 _controller.RefreshClients();
             }
         }

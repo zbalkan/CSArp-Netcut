@@ -14,11 +14,8 @@ using System.Linq;
 using System.Windows.Forms;
 using SharpPcap;
 using SharpPcap.WinPcap;
-using SharpPcap.AirPcap;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Reflection;
-using System.IO;
 
 namespace CSArp
 {
@@ -65,7 +62,6 @@ namespace CSArp
         private GatewayIPAddressInformation gatewayInfo;
         private WinPcapDevice selectedDevice = null;
         private string selectedInterfaceFriendlyName;
-        private IPV4Subnet subnet;
         #endregion
 
         #region constructor
@@ -91,7 +87,7 @@ namespace CSArp
                     {
                         _view.ToolStripStatus.Text = "Ready";
                     }));
-                    NetworkScanner.StartForegroundScan(_view, selectedDevice, currentAddress, gatewayIpAddress, subnet);
+                    NetworkScanner.StartScan(_view, selectedDevice, gatewayIpAddress);
                 }
             }
             else
@@ -139,7 +135,7 @@ namespace CSArp
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";
                   }));
             }
-            Spoofer.Start(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, SelectedInterfaceFriendlyName);
+            Spoofer.Start(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedDevice);
         }
 
         /// <summary>
@@ -160,29 +156,11 @@ namespace CSArp
             gatewayInfo = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(i => i.Name == SelectedInterfaceFriendlyName).GetIPProperties().GatewayAddresses.FirstOrDefault(g => g.Address.AddressFamily
             == System.Net.Sockets.AddressFamily.InterNetwork);
             gatewayIpAddress = gatewayInfo.Address;
-            PopulateCaptureDeviceInfo();
         }
 
-        private void PopulateCaptureDeviceInfo()
+        public void StartCapture()
         {
-
-            var clientlist = new Dictionary<IPAddress, PhysicalAddress>(); //this is preventing redundant entries into listview and for counting total clients
-
             selectedDevice.Open(DeviceMode.Promiscuous, 1000); //open device with 1000ms timeout
-
-            // Getting a readonly collection populated with addreses.
-            // If it is an IPv4 interface, you can get IP Address, subnet mask etc.
-            // if not, there is only physical address. Therefore, we are checking these here.
-            //
-            // Beware that AirPcap is an obsolete protocol. Therefore we are using only winpcap devices for now.
-            // TODO: Add Mode selection: WinPcap & AirPcap.
-            var ipv4Addresses = selectedDevice.Addresses.FirstOrDefault(addr => addr.Addr.ipAddress != null);
-            var currentAddress = ipv4Addresses.Addr.ipAddress;
-            var subnetMask = new IPAddress(ipv4Addresses.Netmask.ipAddress.GetAddressBytes().Reverse().ToArray());// Sharppcap returns reversed mask
-            if (subnet == null)
-            {
-                subnet = new IPV4Subnet(currentAddress, subnetMask);
-            }
         }
 
         public void StopCapture()
