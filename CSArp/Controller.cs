@@ -110,7 +110,7 @@ namespace CSArp
             {
                 if (item.SubItems[0].Text == gatewayIpAddress.ToString())
                 {
-                    gatewayPhysicalAddress = PhysicalAddress.Parse(item.SubItems[1].Text.Replace(":", "-"));
+                    gatewayPhysicalAddress = item.SubItems[1].Text.Parse();
                 }
             }
             if (gatewayPhysicalAddress == null)
@@ -128,7 +128,7 @@ namespace CSArp
             var parseindex = 0;
             foreach (ListViewItem listitem in _view.ClientListView.SelectedItems)
             {
-                targetlist.Add(IPAddress.Parse(listitem.SubItems[0].Text), PhysicalAddress.Parse(listitem.SubItems[1].Text.Replace(":", "-")));
+                targetlist.Add(IPAddress.Parse(listitem.SubItems[0].Text), listitem.SubItems[1].Text.Parse());
                 _ = _view.MainForm.BeginInvoke(new Action(() =>
                   {
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";

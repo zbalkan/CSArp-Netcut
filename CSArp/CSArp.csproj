@@ -59,6 +59,7 @@
     <Compile Include="ArpTable.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="DebugOutput.cs" />
+    <Compile Include="PhysicalAddressExtensions.cs" />
     <Compile Include="Spoofer.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

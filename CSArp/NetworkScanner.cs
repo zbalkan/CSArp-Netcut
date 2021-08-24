@@ -72,11 +72,11 @@ namespace CSArp
                         var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
                         if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
-                            DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress));
+                            DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + arppacket.SenderHardwareAddress.ToString("-"));
                             ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
                             {
-                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", ApplicationSettings.GetSavedClientNameFromMAC(arppacket.SenderHardwareAddress.ToString("-")) }));
                             }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
@@ -177,8 +177,8 @@ namespace CSArp
 
         private static void SendArpRequest(WinPcapDevice networkAdapter, IPAddress targetIpAddress)
         {
-            var arprequestpacket = new ARPPacket(ARPOperation.Request, PhysicalAddress.Parse("00-00-00-00-00-00"), targetIpAddress, networkAdapter.MacAddress, networkAdapter.ReadCurrentIpV4Address());
-            var ethernetpacket = new EthernetPacket(networkAdapter.MacAddress, PhysicalAddress.Parse("FF-FF-FF-FF-FF-FF"), EthernetPacketType.Arp);
+            var arprequestpacket = new ARPPacket(ARPOperation.Request, "00-00-00-00-00-00".Parse(), targetIpAddress, networkAdapter.MacAddress, networkAdapter.ReadCurrentIpV4Address());
+            var ethernetpacket = new EthernetPacket(networkAdapter.MacAddress, "FF-FF-FF-FF-FF-FF".Parse(), EthernetPacketType.Arp);
             ethernetpacket.PayloadPacket = arprequestpacket;
             networkAdapter.SendPacket(ethernetpacket);
             Debug.WriteLine("ARP request is sent to: {0}", targetIpAddress);
@@ -196,41 +196,18 @@ namespace CSArp
                     DebugOutput.Print(view, "Found gateway!");
                     isGateway = true;
                 }
-                DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + GetMACString(arppacket.SenderHardwareAddress) + " from background scan!");
+                DebugOutput.Print(view, "Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + arppacket.SenderHardwareAddress.ToString("-") + " from background scan!");
                 ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                 _ = view.ClientListView.Invoke(new Action(() =>
                 {
                     _ = isGateway
-                        ? view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", "GATEWAY" }))
-                        : view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), GetMACString(arppacket.SenderHardwareAddress), "On", ApplicationSettings.GetSavedClientNameFromMAC(GetMACString(arppacket.SenderHardwareAddress)) }));
+                        ? view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", "GATEWAY" }))
+                        : view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", ApplicationSettings.GetSavedClientNameFromMAC(arppacket.SenderHardwareAddress.ToString("-")) }));
                 }));
                 _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = ArpTable.Instance.Count + " device(s) found"));
             }
         }
 
-        // TODO: Extract method to an extension method.
-        // TODO: Just format string instead.
-        /// <summary>
-        /// Converts a PhysicalAddress to colon delimited string like FF:FF:FF:FF:FF:FF
-        /// </summary>
-        /// <param name="physicaladdress"></param>
-        /// <returns></returns>
-        private static string GetMACString(PhysicalAddress physicaladdress)
-        {
-            try
-            {
-                var retval = "";
-                for (var i = 0; i <= 5; i++)
-                {
-                    retval += physicaladdress.GetAddressBytes()[i].ToString("X2") + ":";
-                }
-
-                return retval.Substring(0, retval.Length - 1);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+        
     }
 }
