@@ -56,7 +56,6 @@ namespace CSArp
 
         #region Private fields
         private readonly IView _view;
-        private IPAddress currentAddress = null;
         private IPAddress gatewayIpAddress = null;
         private PhysicalAddress gatewayPhysicalAddress;
         private GatewayIPAddressInformation gatewayInfo;

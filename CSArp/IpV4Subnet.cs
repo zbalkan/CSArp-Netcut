@@ -95,24 +95,5 @@ namespace CSArp
             Array.Reverse(addressBytes);
             return new IPAddress(addressBytes);
         }
-
-        private static int SubnetToCIDR(IPAddress subnetMask)
-        {
-            var ipParts = subnetMask.GetAddressBytes();
-            var subnet = 16777216 * Convert.ToUInt32(ipParts[0]) + 65536 * Convert.ToUInt32(ipParts[1]) + 256 * Convert.ToUInt32(ipParts[2]) + Convert.ToUInt32(ipParts[3]);
-            var mask = 0x80000000;
-            uint subnetConsecutiveOnes = 0;
-            for (var i = 0; i < 32; i++)
-            {
-                if (!(mask & subnet).Equals(mask))
-                {
-                    break;
-                }
-
-                subnetConsecutiveOnes++;
-                mask >>= 1;
-            }
-            return (int)subnetConsecutiveOnes;
-        }
     }
 }

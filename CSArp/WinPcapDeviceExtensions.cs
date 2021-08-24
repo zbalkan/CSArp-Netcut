@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpPcap;
+﻿using System.Linq;
 using SharpPcap.WinPcap;
 using System.Net;
 using System.Net.NetworkInformation;
