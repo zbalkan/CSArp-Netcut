@@ -16,7 +16,7 @@ namespace CSArp.Model
         private static Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
         private static bool disengageflag = true;
 
-        public static void Start(IView view, Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, WinPcapDevice captureDevice)
+        public static void Start(Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, WinPcapDevice captureDevice)
         {
             engagedclientlist = new Dictionary<IPAddress, PhysicalAddress>();
             captureDevice.Open();
@@ -27,7 +27,7 @@ namespace CSArp.Model
                 var ethernetpacketforgatewayrequest = new EthernetPacket(captureDevice.MacAddress, gatewaymacaddress, EthernetPacketType.Arp);
                 ethernetpacketforgatewayrequest.PayloadPacket = arppacketforgatewayrequest;
                 ThreadBuffer.Add(new Thread(() =>
-                    SendSpoofingPacket(view, target.Key, target.Value, ethernetpacketforgatewayrequest, captureDevice)
+                    SendSpoofingPacket(target.Key, target.Value, ethernetpacketforgatewayrequest, captureDevice)
                   ));
                 engagedclientlist.Add(target.Key, target.Value);
             };
@@ -40,11 +40,11 @@ namespace CSArp.Model
                 engagedclientlist.Clear();
             }
         }
-        private static void SendSpoofingPacket(IView view, IPAddress ipAddress, PhysicalAddress physicalAddress, EthernetPacket ethernetpacketforgatewayrequest, WinPcapDevice captureDevice)
+        private static void SendSpoofingPacket(IPAddress ipAddress, PhysicalAddress physicalAddress, EthernetPacket ethernetpacketforgatewayrequest, WinPcapDevice captureDevice)
         {
 
             disengageflag = false;
-            DebugOutput.Print(view, "Spoofing target " + physicalAddress.ToString() + " @ " + ipAddress.ToString());
+            DebugOutput.Print("Spoofing target " + physicalAddress.ToString() + " @ " + ipAddress.ToString());
             try
             {
                 while (!disengageflag)
@@ -54,9 +54,9 @@ namespace CSArp.Model
             }
             catch (PcapException ex)
             {
-                DebugOutput.Print(view, "PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
+                DebugOutput.Print("PcapException @ DisconnectReconnect.Disconnect() [" + ex.Message + "]");
             }
-            DebugOutput.Print(view, "Spoofing thread @ DisconnectReconnect.Disconnect() for " + physicalAddress.ToString() + " @ " + ipAddress.ToString() + " is terminating.");
+            DebugOutput.Print("Spoofing thread @ DisconnectReconnect.Disconnect() for " + physicalAddress.ToString() + " @ " + ipAddress.ToString() + " is terminating.");
         }
     }
 }

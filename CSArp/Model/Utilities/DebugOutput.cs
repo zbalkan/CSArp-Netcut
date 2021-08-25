@@ -6,22 +6,33 @@ namespace CSArp.Model.Utilities
 {
     public static class DebugOutput
     {
-        public static void Print(IView view, string output)
+        private static IView _view;
+
+        public static void Init(IView view)
         {
+            _view = view ?? throw new ArgumentNullException(nameof(view));
+        }
+
+        public static void Print(string output)
+        {
+            if (_view == null)
+            {
+                throw new ArgumentNullException(nameof(_view));
+            }
+
             try
             {
                 var datetimenow = DateTime.Now.ToString();
-                _ = view.LogRichTextBox.Invoke(new Action(() =>
+                _ = _view.LogRichTextBox.Invoke(new Action(() =>
                   {
-                      view.LogRichTextBox.Text += datetimenow + " : " + output + "\n";
-                      view.LogRichTextBox.SelectionStart = view.LogRichTextBox.Text.Length;
-                      view.LogRichTextBox.ScrollToCaret();
+                      _view.LogRichTextBox.Text += datetimenow + " : " + output + "\n";
+                      _view.LogRichTextBox.SelectionStart = _view.LogRichTextBox.Text.Length;
+                      _view.LogRichTextBox.ScrollToCaret();
                   }));
 
                 Debug.Print(output);
             }
             catch (InvalidOperationException) { }
-
         }
     }
 }

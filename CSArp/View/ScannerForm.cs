@@ -17,6 +17,7 @@ namespace CSArp.View
         {
             InitializeComponent();
             _controller = new Controller(this);
+            DebugOutput.Init(this);
         }
 
         #region IView members
@@ -236,7 +237,7 @@ namespace CSArp.View
                     try
                     {
                         File.WriteAllText(SaveFileDialogLog.FileName, LogRichTextBox.Text);
-                        DebugOutput.Print(this, "Log saved to " + SaveFileDialogLog.FileName);
+                        DebugOutput.Print("Log saved to " + SaveFileDialogLog.FileName);
                     }
                     catch (Exception ex)
                     {

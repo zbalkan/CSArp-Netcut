@@ -48,7 +48,7 @@ namespace CSArp.Presenter
                     }
                     catch (PcapException ex)
                     {
-                        DebugOutput.Print(_view, "Exception at StartForegroundScan while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
+                        DebugOutput.Print("Exception at StartForegroundScan while trying to capturedevice.StopCapture() or capturedevice.Close() [" + ex.Message + "]");
                     }
                 }
                 selectedDevice = NetworkAdapterManager.WinPcapDevices.Where(dev => dev.Interface.FriendlyName != null)
@@ -137,7 +137,7 @@ namespace CSArp.Presenter
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";
                   }));
             }
-            Spoofer.Start(_view, targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedDevice);
+            Spoofer.Start(targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedDevice);
         }
 
         /// <summary>
@@ -169,8 +169,16 @@ namespace CSArp.Presenter
         {
             if (selectedDevice.Opened)
             {
-                selectedDevice.StopCapture();
-                selectedDevice.Close();
+                try
+                {
+                    selectedDevice.StopCapture();
+                    selectedDevice.Close();
+                }
+                catch (Exception)
+                {
+
+                    // ignore exceptions on close
+                }
             }
         }
     }
