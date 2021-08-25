@@ -3,7 +3,7 @@ using System.Net.NetworkInformation;
 using System.Net;
 using System.Collections.Concurrent;
 
-namespace CSArp
+namespace CSArp.Model
 {
     public sealed class ArpTable
     {

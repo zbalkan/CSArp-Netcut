@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace CSArp
+namespace CSArp.View
 {
     public interface IView
     {

@@ -16,8 +16,11 @@ using SharpPcap;
 using SharpPcap.WinPcap;
 using System.Net;
 using System.Net.NetworkInformation;
+using CSArp.Model;
+using CSArp.View;
+using CSArp.Model.Utilities;
 
-namespace CSArp
+namespace CSArp.Presenter
 {
     public class Controller
     {

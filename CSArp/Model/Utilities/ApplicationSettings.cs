@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace CSArp
+namespace CSArp.View
 {
     public static class ApplicationSettings
     {

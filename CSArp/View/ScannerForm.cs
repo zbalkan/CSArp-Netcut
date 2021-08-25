@@ -3,8 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using CSArp.Model;
+using CSArp.Model.Utilities;
+using CSArp.Presenter;
+using CSArp.View;
 
-namespace CSArp
+namespace CSArp.View
 {
     public partial class ScannerForm : Form, IView
     {

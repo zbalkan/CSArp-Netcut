@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Linq;
 
-namespace CSArp
+namespace CSArp.Model
 {
     public static class ThreadBuffer
     {

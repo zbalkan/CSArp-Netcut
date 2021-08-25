@@ -5,8 +5,10 @@ using PacketDotNet;
 using System.Net.NetworkInformation;
 using System.Threading;
 using SharpPcap.WinPcap;
+using CSArp.View;
+using CSArp.Model.Utilities;
 
-namespace CSArp
+namespace CSArp.Model
 {
     public static class Spoofer
     {

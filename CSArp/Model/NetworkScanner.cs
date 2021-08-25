@@ -8,6 +8,9 @@ using PacketDotNet;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using CSArp.View;
+using CSArp.Model.Utilities;
+using CSArp.Model.Extensions;
 
 /*
  Reference:
@@ -15,7 +18,7 @@ using System.Windows.Forms;
  https://www.codeproject.com/Articles/12458/SharpPcap-A-Packet-Capture-Framework-for-NET
 */
 
-namespace CSArp
+namespace CSArp.Model
 {
     // TODO: Add a scanning bool, to set the state for cancellation.
     // TODO: Remove GUI related code out of the class.
@@ -121,7 +124,7 @@ namespace CSArp
                 #endregion
 
                 #region Assign OnPacketArrival event handler and start capturing
-                networkAdapter.OnPacketArrival += (object sender, CaptureEventArgs e) =>
+                networkAdapter.OnPacketArrival += (sender, e) =>
                 {
                     ParseArpResponse(view, networkAdapter.ReadCurrentSubnet(), gatewayIp, e);
                 };
@@ -209,6 +212,6 @@ namespace CSArp
             }
         }
 
-        
+
     }
 }

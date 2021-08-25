@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace CSArp
+namespace CSArp.Model
 {
     public class IPV4Subnet
     {

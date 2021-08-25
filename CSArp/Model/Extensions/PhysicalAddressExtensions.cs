@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CSArp
+namespace CSArp.View
 {
     public static class PhysicalAddressExtensions
     {

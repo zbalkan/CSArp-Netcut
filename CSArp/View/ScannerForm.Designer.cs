@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace CSArp
+namespace CSArp.View
 {
     partial class ScannerForm
     {

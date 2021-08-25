@@ -5,7 +5,7 @@ using SharpPcap;
 using SharpPcap.WinPcap;
 using SharpPcap.AirPcap;
 
-namespace CSArp
+namespace CSArp.Model
 {
     public static class NetworkAdapterManager
     {
