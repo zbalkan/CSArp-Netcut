@@ -57,7 +57,7 @@
   <ItemGroup>
     <Compile Include="Model\Utilities\ApplicationSettings.cs" />
     <Compile Include="Model\ArpTable.cs" />
-    <Compile Include="Presenter\Controller.cs" />
+    <Compile Include="Presenter\Presenter.cs" />
     <Compile Include="Model\Utilities\DebugOutput.cs" />
     <Compile Include="Model\Extensions\PhysicalAddressExtensions.cs" />
     <Compile Include="Model\Spoofer.cs" />
