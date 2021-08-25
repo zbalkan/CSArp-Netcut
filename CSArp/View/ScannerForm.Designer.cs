@@ -64,11 +64,11 @@ namespace CSArp.View
             this.saveStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clientListView = new System.Windows.Forms.ListView();
-            this.columnHeaderSN = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderIP = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderMAC = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderCutoffStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderClientname = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderSN = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.richTextBoxLog = new System.Windows.Forms.RichTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -103,7 +103,7 @@ namespace CSArp.View
             // 
             this.toolStripMenuItemSaveSettings.Name = "toolStripMenuItemSaveSettings";
             this.toolStripMenuItemSaveSettings.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.toolStripMenuItemSaveSettings.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemSaveSettings.Size = new System.Drawing.Size(163, 22);
             this.toolStripMenuItemSaveSettings.Text = "Save";
             this.toolStripMenuItemSaveSettings.ToolTipText = "Save current settings";
             this.toolStripMenuItemSaveSettings.Click += new System.EventHandler(this.toolStripMenuItemSaveSettings_Click);
@@ -111,13 +111,13 @@ namespace CSArp.View
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(160, 6);
             // 
             // toolStripMenuItemMinimize
             // 
             this.toolStripMenuItemMinimize.Name = "toolStripMenuItemMinimize";
             this.toolStripMenuItemMinimize.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.toolStripMenuItemMinimize.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemMinimize.Size = new System.Drawing.Size(163, 22);
             this.toolStripMenuItemMinimize.Text = "Minimize";
             this.toolStripMenuItemMinimize.ToolTipText = "Minimize to tray";
             this.toolStripMenuItemMinimize.Click += new System.EventHandler(this.toolStripMenuItemMinimize_Click);
@@ -126,7 +126,7 @@ namespace CSArp.View
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -150,7 +150,7 @@ namespace CSArp.View
             this.toolStripMenuItemChooseInterface.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripComboBoxDevicelist});
             this.toolStripMenuItemChooseInterface.Name = "toolStripMenuItemChooseInterface";
-            this.toolStripMenuItemChooseInterface.Size = new System.Drawing.Size(180, 22);
+            this.toolStripMenuItemChooseInterface.Size = new System.Drawing.Size(193, 22);
             this.toolStripMenuItemChooseInterface.Text = "Choose interface";
             this.toolStripMenuItemChooseInterface.ToolTipText = "Select the network card to operate on";
             // 
@@ -162,20 +162,19 @@ namespace CSArp.View
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(190, 6);
             // 
             // ClientNametoolStripMenuItem
             // 
             this.ClientNametoolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripTextBoxClientName});
             this.ClientNametoolStripMenuItem.Name = "ClientNametoolStripMenuItem";
-            this.ClientNametoolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ClientNametoolStripMenuItem.Size = new System.Drawing.Size(193, 22);
             this.ClientNametoolStripMenuItem.Text = "Enter Client Name";
             this.ClientNametoolStripMenuItem.ToolTipText = "Enter a name for the selected client";
             // 
             // toolStripTextBoxClientName
             // 
-            this.toolStripTextBoxClientName.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxClientName.Name = "toolStripTextBoxClientName";
             this.toolStripTextBoxClientName.Size = new System.Drawing.Size(100, 23);
             this.toolStripTextBoxClientName.KeyUp += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxClientName_KeyUp);
@@ -183,14 +182,14 @@ namespace CSArp.View
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(190, 6);
             // 
             // cutoffToolStripMenuItem
             // 
             this.cutoffToolStripMenuItem.Name = "cutoffToolStripMenuItem";
             this.cutoffToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.cutoffToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.cutoffToolStripMenuItem.Text = "Disconnect";
+            this.cutoffToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.cutoffToolStripMenuItem.Text = "Start Spoofing";
             this.cutoffToolStripMenuItem.ToolTipText = "Disconnect selected clients";
             this.cutoffToolStripMenuItem.Click += new System.EventHandler(this.cutoffToolStripMenuItem_Click);
             // 
@@ -198,22 +197,22 @@ namespace CSArp.View
             // 
             this.reconnectToolStripMenuItem.Name = "reconnectToolStripMenuItem";
             this.reconnectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.reconnectToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.reconnectToolStripMenuItem.Text = "Stop";
+            this.reconnectToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.reconnectToolStripMenuItem.Text = "Stop Spoofing";
             this.reconnectToolStripMenuItem.ToolTipText = "Stop arp spoofing";
             this.reconnectToolStripMenuItem.Click += new System.EventHandler(this.reconnectToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(190, 6);
             // 
             // toolStripMenuItemRefreshClients
             // 
             this.toolStripMenuItemRefreshClients.Name = "toolStripMenuItemRefreshClients";
             this.toolStripMenuItemRefreshClients.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.toolStripMenuItemRefreshClients.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItemRefreshClients.Text = "Refresh";
+            this.toolStripMenuItemRefreshClients.Size = new System.Drawing.Size(193, 22);
+            this.toolStripMenuItemRefreshClients.Text = "Start Network Scan";
             this.toolStripMenuItemRefreshClients.ToolTipText = "Refresh active client list";
             this.toolStripMenuItemRefreshClients.Click += new System.EventHandler(this.toolStripMenuItemRefreshClients_Click);
             // 
@@ -228,7 +227,7 @@ namespace CSArp.View
             // aboutCSArpToolStripMenuItem
             // 
             this.aboutCSArpToolStripMenuItem.Name = "aboutCSArpToolStripMenuItem";
-            this.aboutCSArpToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutCSArpToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.aboutCSArpToolStripMenuItem.Text = "About CSArp";
             this.aboutCSArpToolStripMenuItem.Click += new System.EventHandler(this.aboutCSArpToolStripMenuItem_Click);
             // 
@@ -257,7 +256,7 @@ namespace CSArp.View
             // toolStripStatusLabelSpringer
             // 
             this.toolStripStatusLabelSpringer.Name = "toolStripStatusLabelSpringer";
-            this.toolStripStatusLabelSpringer.Size = new System.Drawing.Size(230, 19);
+            this.toolStripStatusLabelSpringer.Size = new System.Drawing.Size(261, 19);
             this.toolStripStatusLabelSpringer.Spring = true;
             // 
             // toolStripStatusScan
@@ -287,14 +286,14 @@ namespace CSArp.View
             // clearStripMenuItem
             // 
             this.clearStripMenuItem.Name = "clearStripMenuItem";
-            this.clearStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.clearStripMenuItem.Text = "Clear";
             this.clearStripMenuItem.Click += new System.EventHandler(this.clearStripMenuItem_Click);
             // 
             // saveStripMenuItem
             // 
             this.saveStripMenuItem.Name = "saveStripMenuItem";
-            this.saveStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.saveStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.saveStripMenuItem.Text = "Save";
             this.saveStripMenuItem.Click += new System.EventHandler(this.saveStripMenuItem_Click);
             // 
@@ -302,7 +301,7 @@ namespace CSArp.View
             // 
             this.showLogToolStripMenuItem.CheckOnClick = true;
             this.showLogToolStripMenuItem.Name = "showLogToolStripMenuItem";
-            this.showLogToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.showLogToolStripMenuItem.Size = new System.Drawing.Size(123, 22);
             this.showLogToolStripMenuItem.Text = "Show log";
             this.showLogToolStripMenuItem.CheckStateChanged += new System.EventHandler(this.showLogToolStripMenuItem_CheckStateChanged);
             // 
@@ -327,11 +326,6 @@ namespace CSArp.View
             this.clientListView.UseCompatibleStateImageBehavior = false;
             this.clientListView.View = System.Windows.Forms.View.Details;
             // 
-            // columnHeaderSN
-            // 
-            this.columnHeaderSN.Text = "SN";
-            this.columnHeaderSN.Width = 50;
-            // 
             // columnHeaderIP
             // 
             this.columnHeaderIP.Text = "IP Address";
@@ -352,13 +346,16 @@ namespace CSArp.View
             this.columnHeaderClientname.Text = "Client Name";
             this.columnHeaderClientname.Width = 151;
             // 
+            // columnHeaderSN
+            // 
+            this.columnHeaderSN.Text = "SN";
+            this.columnHeaderSN.Width = 50;
+            // 
             // notifyIcon1
             // 
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "CSArp";
             this.notifyIcon1.Visible = true;
-            this.notifyIcon1.MouseClick += new MouseEventHandler(this.notifyIcon1_OnMouseClick);
-
+            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_OnMouseClick);
             // 
             // richTextBoxLog
             // 
@@ -372,7 +369,7 @@ namespace CSArp.View
             this.richTextBoxLog.Text = "";
             this.richTextBoxLog.Visible = false;
             // 
-            // Form1
+            // ScannerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -383,7 +380,7 @@ namespace CSArp.View
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "ScannerForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "CSArp";
             this.Load += new System.EventHandler(this.Form1_Load);
