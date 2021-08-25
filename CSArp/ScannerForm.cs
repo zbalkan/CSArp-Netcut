@@ -6,10 +6,10 @@ using System.Windows.Forms;
 
 namespace CSArp
 {
-    public partial class Form1 : Form, IView
+    public partial class ScannerForm : Form, IView
     {
         private readonly Controller _controller;
-        public Form1()
+        public ScannerForm()
         {
             InitializeComponent();
             _controller = new Controller(this);

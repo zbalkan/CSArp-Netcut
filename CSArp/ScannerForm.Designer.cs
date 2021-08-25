@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace CSArp
 {
-    partial class Form1
+    partial class ScannerForm
     {
         /// <summary>
         /// Required designer variable.
@@ -34,7 +34,7 @@ namespace CSArp
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScannerForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSaveSettings = new System.Windows.Forms.ToolStripMenuItem();
