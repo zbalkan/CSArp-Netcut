@@ -12,11 +12,11 @@ namespace CSArp.View
 {
     public partial class ScannerForm : Form, IView
     {
-        private readonly Controller _controller;
+        private readonly Presenter.Presenter _controller;
         public ScannerForm()
         {
             InitializeComponent();
-            _controller = new Controller(this);
+            _controller = new Presenter.Presenter(this);
             DebugOutput.Init(this);
         }
 

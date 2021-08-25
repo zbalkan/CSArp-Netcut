@@ -22,7 +22,7 @@ using CSArp.Model.Utilities;
 
 namespace CSArp.Presenter
 {
-    public class Controller
+    public class Presenter
     {
         #region Public properties
         public string SelectedInterfaceFriendlyName
@@ -67,7 +67,7 @@ namespace CSArp.Presenter
         #endregion
 
         #region constructor
-        public Controller(IView view)
+        public Presenter(IView view)
         {
             _view = view;
             ThreadBuffer.Init();
