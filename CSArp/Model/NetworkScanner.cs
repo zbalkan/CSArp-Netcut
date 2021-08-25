@@ -22,14 +22,18 @@ namespace CSArp.Model
 {
     // TODO: Add a scanning bool, to set the state for cancellation.
     // TODO: Remove GUI related code out of the class.
-    public static class NetworkScanner
+    public class NetworkScanner
     {
+
+        private const string prefix = "Scan";
+        private bool scanning = false;
+
         /// <summary>
         /// Populates listview with machines connected to the LAN
         /// </summary>
         /// <param name="view"></param>
         /// <param name="networkAdapter"></param>
-        public static void StartScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
+        public void StartScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
         {
             DebugOutput.Print("Refresh client list");
             #region initialization
@@ -38,6 +42,9 @@ namespace CSArp.Model
             view.ClientListView.Items.Clear();
             #endregion
 
+            // Change state
+            scanning = true;
+
             // Clear ARP table
             ArpTable.Instance.Clear();
 
@@ -45,7 +52,7 @@ namespace CSArp.Model
             StartForegroundScan(view, networkAdapter, gatewayIp, 5000);
         }
 
-        private static void StartForegroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp, int foregroundScanTimeout)
+        private void StartForegroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp, int foregroundScanTimeout)
         {
             // Obtain subnet information
             var subnet = networkAdapter.ReadCurrentSubnet();
@@ -55,32 +62,41 @@ namespace CSArp.Model
 
             // TODO: Send and capture ICMP packages for both MAC address and alive status.
             #region Sending ARP requests to probe for all possible IP addresses on LAN
-            ThreadBuffer.Add(new Thread(() =>
+            ThreadBuffer.AddWithPrefix(new Thread(() =>
             {
                 InitiateArpRequestQueue(view, networkAdapter, gatewayIp);
-            }));
+            }),
+            prefix);
             #endregion
 
             #region Retrieving ARP packets floating around and finding out the senders' IP and MACs
             networkAdapter.Filter = "arp";
             RawCapture rawcapture = null;
-            ThreadBuffer.Add(new Thread(() =>
+            ThreadBuffer.AddWithPrefix(new Thread(() =>
             {
                 try
                 {
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
-                    while ((rawcapture = networkAdapter.GetNextPacket()) != null && stopwatch.ElapsedMilliseconds <= foregroundScanTimeout)
+                    while ((rawcapture = networkAdapter.GetNextPacket()) != null && stopwatch.ElapsedMilliseconds <= foregroundScanTimeout && scanning)
                     {
                         var packet = Packet.ParsePacket(rawcapture.LinkLayerType, rawcapture.Data);
                         var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
                         if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
                         {
+                            var isGateway = false;
+                            if (arppacket.SenderProtocolAddress.Equals(gatewayIp))
+                            {
+                                DebugOutput.Print("Found gateway!");
+                                isGateway = true;
+                            }
                             DebugOutput.Print("Added " + arppacket.SenderProtocolAddress.ToString() + " @ " + arppacket.SenderHardwareAddress.ToString("-"));
                             ArpTable.Instance.Add(arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                             _ = view.ClientListView.Invoke(new Action(() =>
                             {
-                                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", ApplicationSettings.GetSavedClientNameFromMAC(arppacket.SenderHardwareAddress.ToString("-")) }));
+                                _ = isGateway
+                                ? view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", "GATEWAY" }))
+                                : view.ClientListView.Items.Add(new ListViewItem(new string[] { arppacket.SenderProtocolAddress.ToString(), arppacket.SenderHardwareAddress.ToString("-"), "On", ApplicationSettings.GetSavedClientNameFromMAC(arppacket.SenderHardwareAddress.ToString("-")) }));
                             }));
                             //Debug.Print("{0} @ {1}", arppacket.SenderProtocolAddress, arppacket.SenderHardwareAddress);
                         }
@@ -105,22 +121,24 @@ namespace CSArp.Model
                     DebugOutput.Print(ex.Message);
                 }
 
-            }));
+            }),
+            prefix);
             #endregion
         }
 
         /// <summary>
         /// Actively monitor ARP packets for signs of new clients after StartForegroundScan active scan is done
         /// </summary>
-        public static void StartBackgroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
+        private void StartBackgroundScan(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
         {
             try
             {
                 #region Sending ARP requests to probe for all possible IP addresses on LAN
-                ThreadBuffer.Add(new Thread(() =>
+                ThreadBuffer.AddWithPrefix(new Thread(() =>
                 {
                     InitiateArpRequestQueue(view, networkAdapter, gatewayIp);
-                }));
+                }),
+                prefix);
                 #endregion
 
                 #region Assign OnPacketArrival event handler and start capturing
@@ -136,8 +154,15 @@ namespace CSArp.Model
                 DebugOutput.Print("Exception at GetClientList.BackgroundScanStart() [" + ex.Message + "]");
             }
         }
+
+        public void StopScan()
+        {
+            scanning = false; // Prevent new packets
+            ThreadBuffer.StopThreadByPrefix(prefix); // kill existing threads
+        }
+
         // TODO: Start spoofing for devices regarding online status.
-        private static void InitiateArpRequestQueue(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
+        private void InitiateArpRequestQueue(IView view, WinPcapDevice networkAdapter, IPAddress gatewayIp)
         {
             try
             {
@@ -155,14 +180,19 @@ namespace CSArp.Model
                 // Remove current address from the list and add to ARP table statically
                 _ = addressList.Remove(networkAdapter.ReadCurrentIpV4Address());
                 ArpTable.Instance.Add(networkAdapter.ReadCurrentIpV4Address(), networkAdapter.MacAddress);
+                _ = view.ClientListView.Items.Add(new ListViewItem(new string[] { networkAdapter.ReadCurrentIpV4Address().ToString(), networkAdapter.MacAddress.ToString("-"), "On", ApplicationSettings.GetSavedClientNameFromMAC(networkAdapter.MacAddress.ToString("-")) }));
 
                 // Start
                 foreach (var targetIpAddress in addressList)
                 {
-                    ThreadBuffer.Add(new Thread(() =>
+                    if (scanning)
                     {
-                        SendArpRequest(networkAdapter, targetIpAddress);
-                    }));
+                        ThreadBuffer.AddWithPrefix(new Thread(() =>
+                        {
+                            SendArpRequest(networkAdapter, targetIpAddress);
+                        }),
+                        prefix);
+                    }
                 }
             }
             catch (PcapException ex)
@@ -179,7 +209,7 @@ namespace CSArp.Model
             }
         }
 
-        private static void SendArpRequest(WinPcapDevice networkAdapter, IPAddress targetIpAddress)
+        private void SendArpRequest(WinPcapDevice networkAdapter, IPAddress targetIpAddress)
         {
             var arprequestpacket = new ARPPacket(ARPOperation.Request, "00-00-00-00-00-00".Parse(), targetIpAddress, networkAdapter.MacAddress, networkAdapter.ReadCurrentIpV4Address());
             var ethernetpacket = new EthernetPacket(networkAdapter.MacAddress, "FF-FF-FF-FF-FF-FF".Parse(), EthernetPacketType.Arp);
@@ -188,14 +218,14 @@ namespace CSArp.Model
             Debug.WriteLine("ARP request is sent to: {0}", targetIpAddress);
         }
 
-        private static void ParseArpResponse(IView view, IPV4Subnet subnet, IPAddress gatewayIp, CaptureEventArgs e)
+        private void ParseArpResponse(IView view, IPV4Subnet subnet, IPAddress gatewayIp, CaptureEventArgs e)
         {
             var packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var arppacket = (ARPPacket)packet.Extract(typeof(ARPPacket));
-            if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress))
+            if (!ArpTable.Instance.ContainsKey(arppacket.SenderProtocolAddress) && arppacket.SenderProtocolAddress.ToString() != "0.0.0.0" && subnet.Contains(arppacket.SenderProtocolAddress) && scanning)
             {
                 var isGateway = false;
-                if (arppacket.SenderProtocolAddress == gatewayIp)
+                if (arppacket.SenderProtocolAddress.Equals(gatewayIp))
                 {
                     DebugOutput.Print("Found gateway!");
                     isGateway = true;
@@ -211,7 +241,5 @@ namespace CSArp.Model
                 _ = view.MainForm.Invoke(new Action(() => view.ToolStripStatusScan.Text = ArpTable.Instance.Count + " device(s) found"));
             }
         }
-
-
     }
 }

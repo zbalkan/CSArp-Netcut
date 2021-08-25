@@ -72,6 +72,7 @@ namespace CSArp.View
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.richTextBoxLog = new System.Windows.Forms.RichTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.stopNetworkScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -140,7 +141,8 @@ namespace CSArp.View
             this.cutoffToolStripMenuItem,
             this.reconnectToolStripMenuItem,
             this.toolStripSeparator2,
-            this.toolStripMenuItemRefreshClients});
+            this.toolStripMenuItemRefreshClients,
+            this.stopNetworkScanToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.editToolStripMenuItem.Text = "Edit";
@@ -175,6 +177,7 @@ namespace CSArp.View
             // 
             // toolStripTextBoxClientName
             // 
+            this.toolStripTextBoxClientName.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBoxClientName.Name = "toolStripTextBoxClientName";
             this.toolStripTextBoxClientName.Size = new System.Drawing.Size(100, 23);
             this.toolStripTextBoxClientName.KeyUp += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxClientName_KeyUp);
@@ -369,6 +372,15 @@ namespace CSArp.View
             this.richTextBoxLog.Text = "";
             this.richTextBoxLog.Visible = false;
             // 
+            // stopNetworkScanToolStripMenuItem
+            // 
+            this.stopNetworkScanToolStripMenuItem.Name = "stopNetworkScanToolStripMenuItem";
+            this.stopNetworkScanToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.stopNetworkScanToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.stopNetworkScanToolStripMenuItem.Text = "Stop Network Scan";
+            this.stopNetworkScanToolStripMenuItem.ToolTipText = "Stop scanning";
+            this.stopNetworkScanToolStripMenuItem.Click += new System.EventHandler(this.stopNetworkScanToolStripMenuItem_Click);
+            // 
             // ScannerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -433,6 +445,7 @@ namespace CSArp.View
         private System.Windows.Forms.ToolStripMenuItem saveStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private ToolStripMenuItem stopNetworkScanToolStripMenuItem;
     }
 }
 

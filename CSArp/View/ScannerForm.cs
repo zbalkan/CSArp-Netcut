@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Windows.Forms;
 using CSArp.Model;
 using CSArp.Model.Utilities;
-using CSArp.Presenter;
-using CSArp.View;
 
 namespace CSArp.View
 {
@@ -111,7 +109,7 @@ namespace CSArp.View
                 _controller.SelectedInterfaceFriendlyName = ToolStripComboBoxNetworkDeviceList.Text;
                 _controller.GetGatewayInformation();
                 _controller.StartCapture();
-                _controller.RefreshClients();
+                _controller.StartNetworkScan();
             }
         }
 
@@ -260,5 +258,11 @@ namespace CSArp.View
             _controller.StopCapture();
         }
         #endregion
+
+        private void stopNetworkScanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _controller.StopNetworkScan();
+            ToolStripStatus.Text = "Scan stopped!";
+        }
     }
 }

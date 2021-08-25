@@ -26,6 +26,8 @@ namespace CSArp.Presenter
     {
         #region Public properties
         public Spoofer ArpSpoofer { get; set; }
+
+        public NetworkScanner NetworkScanner { get; set; }
         public string SelectedInterfaceFriendlyName
         {
             get
@@ -73,6 +75,7 @@ namespace CSArp.Presenter
             _view = view;
             ThreadBuffer.Init();
             ArpSpoofer = new Spoofer();
+            NetworkScanner = new NetworkScanner();
         }
         #endregion
 
@@ -80,7 +83,7 @@ namespace CSArp.Presenter
         /// Populate the LAN clients
         /// </summary>
         /// // TODO: Use the device interface, not the name
-        public void RefreshClients()
+        public void StartNetworkScan()
         {
             if (!string.IsNullOrEmpty(SelectedInterfaceFriendlyName)) //if a network interface has been selected
             {
@@ -98,6 +101,11 @@ namespace CSArp.Presenter
             {
                 _ = MessageBox.Show("Please select a network interface!", "Interface", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }
+        }
+
+        public void StopNetworkScan()
+        {
+            NetworkScanner.StopScan();
         }
 
         /// <summary>
