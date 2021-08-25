@@ -32,7 +32,7 @@ namespace CSArp.Model
                 engagedclientlist.Add(target.Key, target.Value);
             };
         }
-        public static void Stop()
+        public static void StopAll()
         {
             disengageflag = true;
             if (engagedclientlist != null)

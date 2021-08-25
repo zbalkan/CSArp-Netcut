@@ -84,7 +84,7 @@ namespace CSArp.Presenter
             {
                 if (_view.ToolStripStatusScan.Text.IndexOf("Scanning") == -1) //if a scan isn't active already
                 {
-                    Spoofer.Stop(); // first disengage spoofing threads
+                    Spoofer.StopAll(); // first disengage spoofing threads
                     _ = _view.MainForm.BeginInvoke(new Action(() =>
                     {
                         _view.ToolStripStatus.Text = "Ready";
@@ -145,7 +145,7 @@ namespace CSArp.Presenter
         /// </summary>
         public void ReconnectClients() //selective reconnection not availabe at this time and frankly, not that useful
         {
-            Spoofer.Stop();
+            Spoofer.StopAll();
             foreach (ListViewItem entry in _view.ClientListView.Items)
             {
                 entry.SubItems[2].Text = "On";
