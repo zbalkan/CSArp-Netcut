@@ -154,7 +154,7 @@ namespace CSArp.Model
 
                 // Remove current address from the list and add to ARP table statically
                 _ = addressList.Remove(networkAdapter.ReadCurrentIpV4Address());
-                ArpTable.Instance.Add(networkAdapter.ReadCurrentIpV4Address(), networkAdapter.ReadCurrentPhysicalAddress());
+                ArpTable.Instance.Add(networkAdapter.ReadCurrentIpV4Address(), networkAdapter.MacAddress);
 
                 // Start
                 foreach (var targetIpAddress in addressList)

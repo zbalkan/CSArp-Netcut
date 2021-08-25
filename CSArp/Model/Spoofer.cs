@@ -7,6 +7,7 @@ using System.Threading;
 using SharpPcap.WinPcap;
 using CSArp.View;
 using CSArp.Model.Utilities;
+using CSArp.Model.Extensions;
 
 namespace CSArp.Model
 {
@@ -14,7 +15,6 @@ namespace CSArp.Model
     {
         private static Dictionary<IPAddress, PhysicalAddress> engagedclientlist;
         private static bool disengageflag = true;
-        //private static IcaptureDevice captureDevice;
 
         public static void Start(IView view, Dictionary<IPAddress, PhysicalAddress> targetlist, IPAddress gatewayipaddress, PhysicalAddress gatewaymacaddress, WinPcapDevice captureDevice)
         {
@@ -22,7 +22,7 @@ namespace CSArp.Model
             captureDevice.Open();
             foreach (var target in targetlist)
             {
-                var myipaddress = captureDevice.Addresses[1].Addr.ipAddress; //possible critical point : Addresses[1] in hardcoding the index for obtaining ipv4 address
+                var myipaddress = captureDevice.ReadCurrentIpV4Address();
                 var arppacketforgatewayrequest = new ARPPacket(ARPOperation.Request, "00-00-00-00-00-00".Parse(), gatewayipaddress, captureDevice.MacAddress, target.Key);
                 var ethernetpacketforgatewayrequest = new EthernetPacket(captureDevice.MacAddress, gatewaymacaddress, EthernetPacketType.Arp);
                 ethernetpacketforgatewayrequest.PayloadPacket = arppacketforgatewayrequest;

@@ -3,6 +3,7 @@ using SharpPcap.WinPcap;
 using System.Net;
 using System.Net.NetworkInformation;
 using CSArp.Model;
+using System;
 
 namespace CSArp.Model.Extensions
 {
@@ -30,6 +31,7 @@ namespace CSArp.Model.Extensions
             return device.Addresses.FirstOrDefault(addr => addr.Addr.ipAddress != null).Addr.ipAddress;
         }
 
+        [Obsolete("Use device.MacAddressworks instead")]
         public static PhysicalAddress ReadCurrentPhysicalAddress(this WinPcapDevice device)
         {
             // Type information in WinPcap is plain wrong. IPv4 addresses are assumed to be IPv6 and most of the time @type is just null.
